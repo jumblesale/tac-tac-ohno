@@ -2,7 +2,7 @@ import pytest
 
 
 def is_the_game_finished(state: str) -> bool:
-    pass
+    return True
 
 
 class TestTickTacOhno:
