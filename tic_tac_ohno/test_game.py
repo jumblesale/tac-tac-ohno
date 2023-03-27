@@ -1,6 +1,7 @@
 from typing import List
 import pytest
-from tic_tac_ohno.game import is_the_game_complete_horizontally, is_the_game_complete_vertically
+from tic_tac_ohno.game import is_the_game_complete_horizontally,\
+                              is_the_game_complete_vertically
 
 
 def a_blank_state(dimension: int) -> str:
@@ -16,22 +17,46 @@ non_complete_states = [
     a_state_with_rows(['*']),
     a_state_with_rows(['**',
                        'X*']),
-    a_state_with_rows(['op',
-                       'po']),
-    a_state_with_rows(['o*',
-                       'o*']),
-    a_state_with_rows(['*o',
-                       'o*']),
-    a_state_with_rows(['o*',
-                       '*o']), ]
+    a_state_with_rows(['*e*',
+                       'e**',
+                       '**&', ]),
+    a_state_with_rows([''.join(['*'] * 99)] * 99), ]
+non_complete_rows = [
+    a_state_with_rows(['o**',
+                       'o**',
+                       'o**', ]),
+    a_state_with_rows(['**o',
+                       '*o*',
+                       'o**', ]),
+    a_state_with_rows(['o**',
+                       '*o*',
+                       '**o', ]),
+    a_state_with_rows(['oo*',
+                       '*oo',
+                       '*o*', ]), ]
+non_complete_columns = [
+    a_state_with_rows(['o**',
+                       '*o*',
+                       '**o', ]),
+    a_state_with_rows(['**o',
+                       '*o*',
+                       'o**', ]),
+    a_state_with_rows(['ooo',
+                       '***',
+                       '***', ]), ]
 
 
-@pytest.mark.parametrize('state', non_complete_states)
+@pytest.mark.parametrize('state', non_complete_states + non_complete_rows)
 def test_the_game_is_not_finished_when_there_are_incomplete_rows(state):
     assert is_the_game_complete_horizontally(state) is None
 
 
-complete_row_states_horizontal = [
+@pytest.mark.parametrize('state', non_complete_states + non_complete_columns)
+def test_the_game_is_not_finished_when_there_are_incomplete_columns(state):
+    assert is_the_game_complete_vertically(state) is None
+
+
+complete_states_rows = [
     (a_state_with_rows(['p']),  (0, 'p')),
     (a_state_with_rows(['**',
                         '55']), (1, '5')),
@@ -41,9 +66,27 @@ complete_row_states_horizontal = [
                         ';;*;;',
                         'zzzz*',
                         ';;;;;',
-                        '*****', ]), (3, ';'))]
+                        '*****', ]), (3, ';')), ]
 
 
-@pytest.mark.parametrize('state, expected', complete_row_states_horizontal)
+@pytest.mark.parametrize('state, expected', complete_states_rows)
 def test_the_game_is_finished_when_there_is_a_row_of_the_same_icon(state, expected):
+    assert is_the_game_complete_horizontally(state) == expected
+
+
+complete_states_columns = [
+    (a_state_with_rows(['¥']),  (0, '¥')),
+    (a_state_with_rows(['.,',
+                        '..']), (0, '.')),
+    (a_state_with_rows(['q%',
+                        '*%']), (1, '%')),
+    (a_state_with_rows(['***#*',
+                        '^**#*',
+                        '*^*#*',
+                        '**^#*',
+                        '***#*', ]), (3, '#')), ]
+
+
+@pytest.mark.parametrize('state, expected', complete_states_columns)
+def test_the_game_is_finished_when_there_is_a_column_of_the_same_icon(state, expected):
     assert is_the_game_complete_horizontally(state) == expected
