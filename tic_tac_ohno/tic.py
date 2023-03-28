@@ -9,6 +9,8 @@ Tic = Callable[[
     GameCompleteCheck,
     Callable[[str], str]
 ], str]
+Move = Callable[[str, str, int, int], str]
+States = Literal['ɑ', 'Ω', 'tac']
 
 
 def tic(
@@ -17,11 +19,19 @@ def tic(
     _is_the_game_complete_vertically:   GameCompleteCheck,
     _tic_to_tac:                        Callable[[str], str],
 ) -> str:
-    ...
+    def _round(state: str):
+        if (h := is_the_game_complete_horizontally(str)) is not None:
+            yield h
+        if (v := is_the_game_complete_vertically(str)) is not None:
+            yield v
 
 
-def grid_generator():
+def move():
     pass
+
+
+def grid_generator(dimension: int) -> str:
+    return '\n'.join([('*' * dimension)] * dimension)
 
 
 def is_the_game_complete_horizontally(state: str) -> GameComplete:

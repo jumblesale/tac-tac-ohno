@@ -2,7 +2,8 @@ from typing import List
 import pytest
 from tic_tac_ohno.tic import is_the_game_complete_horizontally,\
                              is_the_game_complete_vertically,\
-                             grid_generator
+                             grid_generator,\
+                             move
 
 
 def a_blank_state(dimension: int) -> str:
@@ -14,11 +15,11 @@ def a_state_with_rows(rows: List[str]) -> str:
 
 
 blank_grids = [
-    ('*',                      1),
-    ('**\n**',                 2),
-    ('***\n***\n***',          3),
-    ('****\n****\n****\n****', 4),
-    ((('*' * 99) + '\n') * 99, 99), ]
+    ('*',                             1),
+    ('**\n**',                        2),
+    ('***\n***\n***',                 3),
+    ('****\n****\n****\n****',        4),
+    (((('*' * 32) + '\n') * 32)[:-1], 32), ]
 
 
 @pytest.mark.parametrize('expected, dimension', blank_grids)
@@ -92,7 +93,9 @@ complete_states_columns = [
     (a_state_with_rows(['¥']),    (0, '¥')),
     (a_state_with_rows(['.,',
                         '.*', ]), (0, '.')),
-    (a_state_with_rows(['q%',
+    (a_state_with_rows(['.q',
+                        '*q', ]), (1, 'q')),
+    (a_state_with_rows(['S%',
                         '*%', ]), (1, '%')),
     (a_state_with_rows(['***#*',
                         '^**#*',
@@ -104,3 +107,17 @@ complete_states_columns = [
 @pytest.mark.parametrize('state, expected', complete_states_columns)
 def test_the_game_is_finished_when_there_is_a_column_of_the_same_icon(state, expected):
     assert is_the_game_complete_vertically(state) == expected
+
+
+def test_moving_applies_an_icon_to_a_location():
+    # arrange
+    starting_state = a_state_with_rows(['&*$', '*$*', '$$&'])
+    icon = '&'
+    x = 1
+    y = 2
+
+    # act
+    new_state = move(starting_state, icon, x, y)
+    
+    # assert
+    assert new_state == '\n'.join(['**$', '*$&', '$$*'])
