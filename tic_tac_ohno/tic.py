@@ -26,8 +26,10 @@ def tic(
             yield v
 
 
-def move():
-    pass
+def move(icon: str, state: str, x: int, y: int) -> str:
+    matrix = [list(x) for x in state.split('\n')]
+    matrix[y][x] = icon
+    return '\n'.join([''.join(x) for x in matrix])
 
 
 def grid_generator(dimension: int) -> str:
