@@ -111,13 +111,16 @@ def test_the_game_is_finished_when_there_is_a_column_of_the_same_icon(state, exp
 
 def test_moving_applies_an_icon_to_a_location():
     # arrange
-    starting_state = a_state_with_rows(['&*$', '*$*', '$*&'])
     icon = '&'
     x = 1
     y = 2
+    starting_state = a_state_with_rows(
+        ['&*$', '*$*', '$*&'])
+    expected_state = '\n'.join(
+        ['&*$', '*$*', '$&&'])
 
     # act
     new_state = move(icon, starting_state, x, y)
 
     # assert
-    assert new_state == '\n'.join(['&*$', '*$*', '$&&'])
+    assert new_state == expected_state

@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, Literal, Callable
+from typing import Optional, Tuple, Callable, NamedTuple, List, Generator
 
 GridGenerator = Callable[[int], str]
 GameComplete = Optional[Tuple[int, str]]
@@ -10,20 +10,65 @@ Tic = Callable[[
     Callable[[str], str]
 ], str]
 Move = Callable[[str, str, int, int], str]
-States = Literal['ɑ', 'Ω', 'tac']
+
+
+class Turn(NamedTuple):
+    current_state: str
+    icon:          str
+    x:             int
+    y:             int
+
+
+class CompletedGame(NamedTuple):
+    rows:    GameComplete
+    columns: GameComplete
+
+
+class MoveResult(NamedTuple):
+    state:     str
+    completed: Optional[CompletedGame]
+
+
+StateGenerator = Generator[str, Turn, MoveResult]
+
+
+def default_tic(
+        dimension: int
+) -> StateGenerator:
+    return tic(
+        grid_generator,
+        is_the_game_complete_horizontally,
+        is_the_game_complete_vertically,
+        move,
+        dimension
+    )
 
 
 def tic(
-    _grid_generator:                    GridGenerator,
-    _is_the_game_complete_horizontally: GameCompleteCheck,
-    _is_the_game_complete_vertically:   GameCompleteCheck,
-    _tic_to_tac:                        Callable[[str], str],
-) -> str:
-    def _round(state: str):
-        if (h := is_the_game_complete_horizontally(str)) is not None:
-            yield h
-        if (v := is_the_game_complete_vertically(str)) is not None:
-            yield v
+        _grid_generator:                    GridGenerator,
+        _is_the_game_complete_horizontally: GameCompleteCheck,
+        _is_the_game_complete_vertically:   GameCompleteCheck,
+        _move:                              Move,
+        _dimension:                         int,
+) -> StateGenerator:
+    def _lift_move(turn: Turn) -> MoveResult:
+        new_state = _move(turn.icon, turn.current_state, turn.x, turn.y)
+        if (h := _is_the_game_complete_horizontally(new_state)) is not None:
+            return MoveResult(new_state, CompletedGame(h, None))
+        if (v := _is_the_game_complete_vertically(new_state)) is not None:
+            return MoveResult(new_state, CompletedGame(None, v))
+        return MoveResult(new_state, None)
+
+    def _play():
+        state = _grid_generator(_dimension)
+        turn = yield state
+        while True:
+            result = _lift_move(turn)
+            if result.completed is not None:
+                return result
+            turn = yield result.state
+
+    return _play()
 
 
 def move(icon: str, state: str, x: int, y: int) -> str:
