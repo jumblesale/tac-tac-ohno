@@ -74,7 +74,6 @@ def game(
     omega_player:     Player,
     state_generator:  StateGenerator,
     x_y_input:        XYInput,
-    row_column_input: RowColumnInput,
 ):
     player_generator = itertools.cycle(
         [(omega_player, alpha_player), (alpha_player, omega_player)])
@@ -84,7 +83,7 @@ def game(
     yield draw(state, alpha_player, omega_player, turn_count)
     while True:
         x, y = x_y_input(current_player.player)
-        turn = Turn(state, current_player.icon, x, y)
+        turn = TicTurn(state, current_player.icon, x, y)
         try:
             state = state_generator.send(turn)
         except StopIteration as ex:
@@ -97,10 +96,14 @@ def game(
 
 def main():
     def _get_dimension():
-        _max = 10
+        _max = 9
+        _min = 2
         _dimension = int(input('How big should the grid be? '))
         if _dimension > _max:
             print(f'Maximum dimension is {_max}')
+            return _get_dimension()
+        if _dimension < _min:
+            print(f'Minimum dimension is {_min}')
             return _get_dimension()
         return _dimension
     dimension = _get_dimension()

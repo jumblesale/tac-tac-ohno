@@ -12,7 +12,7 @@ Tic = Callable[[
 Move = Callable[[str, str, int, int], str]
 
 
-class Turn(NamedTuple):
+class TicTurn(NamedTuple):
     current_state: str
     icon:          str
     x:             int
@@ -29,7 +29,7 @@ class MoveResult(NamedTuple):
     completed: Optional[CompletedGame]
 
 
-StateGenerator = Generator[str, Turn, MoveResult]
+StateGenerator = Generator[str, TicTurn, MoveResult]
 
 
 def default_tic(
@@ -51,7 +51,7 @@ def tic(
         _move:                              Move,
         _dimension:                         int,
 ) -> StateGenerator:
-    def _lift_move(turn: Turn) -> MoveResult:
+    def _lift_move(turn: TicTurn) -> MoveResult:
         new_state = _move(turn.icon, turn.current_state, turn.x, turn.y)
         if (h := _is_the_game_complete_horizontally(new_state)) is not None:
             return MoveResult(new_state, CompletedGame(h, None))
