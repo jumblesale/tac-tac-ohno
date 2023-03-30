@@ -111,3 +111,15 @@ invalid_moves = [
 @pytest.mark.parametrize("state, column_or_row, icon, index", invalid_moves)
 def test_it_rejects_invalid_moves(state: str, column_or_row: ColumnOrRow, icon: str, index: int):
     assert valid_move(state, column_or_row, icon, index) is False
+
+
+valid_moves = [
+    (a_state_with_rows(['*Z*', '***', '***']), 'c', 'Z', 1),
+    (a_state_with_rows(['O**', '***', '***']), 'c', 'O', 0),
+    (a_state_with_rows(['O**', '***', '***']), 'r', 'O', 0),
+    (a_state_with_rows(['***', '***', 'P**']), 'r', 'P', 2), ]
+
+
+@pytest.mark.parametrize("state, column_or_row, icon, index", valid_moves)
+def test_it_rejects_invalid_moves(state: str, column_or_row: ColumnOrRow, icon: str, index: int):
+    assert valid_move(state, column_or_row, icon, index) is True

@@ -14,8 +14,11 @@ class TacTurn(NamedTuple):
     index:             int
 
 
-def valid_move(*args):
-    return False
+def valid_move(state: str, column_or_row: ColumnOrRow, icon: str, index: int):
+    matrix = [list(x) for x in state.split('\n')]
+    if column_or_row == 'c':
+        return matrix[0][index] == icon
+    return matrix[index][0] == icon
 
 
 def default_tac(
