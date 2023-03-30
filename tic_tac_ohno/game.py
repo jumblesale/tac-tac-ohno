@@ -1,22 +1,7 @@
 import itertools
-from typing import Literal
 
-from tic_tac_ohno.tic import *
-
-Players = Literal['⍺', 'Ω']
-XYInput = Callable[[str], Tuple[int, int]]
-RowOrColumn = Literal['row', 'column']
-RowColumnInput = Callable[[str], Tuple[RowOrColumn, int]]
-
-
-class Player(NamedTuple):
-    player: Players
-    icon:   str
-
-
-class InputDisplay(NamedTuple):
-    state:          str
-    current_player: Player
+from tic_tac_ohno.game_lib import Player, InputDisplay
+from tic_tac_ohno.tic_game import TicTurnGenerator, tic_turn_generator, get_player_x_y, TicStateGenerator, default_tic
 
 
 def draw(state, current_player: Player, next_player: Player, turn_count: int):
@@ -54,42 +39,11 @@ def draw(state, current_player: Player, next_player: Player, turn_count: int):
 """
 
 
-def get_player_x_y(maximum: int) -> XYInput:
-
-    def _out_of_bounds(x_or_y: int):
-        nonlocal maximum
-        print(f'{x_or_y} is out of bounds')
-        yield from get_player_x_y(maximum)
-
-    def _get_x_y(_current_player_icon: str):
-        nonlocal maximum
-        x = int(input(f'{_current_player_icon} x: '))
-        if x > maximum:
-            return _out_of_bounds(x)
-        y = int(input(f'{_current_player_icon} y: '))
-        if y > maximum:
-            return _out_of_bounds(y)
-        return x, y
-
-    return _get_x_y
-
-
-def tic_turn_generator(
-    x_y_input: XYInput,
-) -> Generator[TicTurn, InputDisplay, None]:
-    input_display: InputDisplay = yield
-    while True:
-        x, y = x_y_input(input_display.current_player.icon)
-        input_display = yield TicTurn(
-            input_display.state, input_display.current_player.icon, x, y
-        )
-
-
-def tic_game(
+def game(
     alpha_player:        Player,
     omega_player:        Player,
-    tic_state_generator: StateGenerator,
-    _tic_turn_generator: Generator[TicTurn, InputDisplay, None],
+    tic_state_generator: TicStateGenerator,
+    _tic_turn_generator: TicTurnGenerator,
 ):
     player_generator = itertools.cycle(
         [(omega_player, alpha_player), (alpha_player, omega_player)])
@@ -130,17 +84,13 @@ def main():
     omega_icon = 'O'
     alpha = Player('⍺', alpha_icon)
     omega = Player('Ω', omega_icon)
-    icon_to_player_map = {
-        alpha_icon: alpha,
-        omega_icon: omega,
-    }
-    tic_screen_generator = tic_game(
+    tic_state_generator = game(
         alpha,
         omega,
         default_tic(dimension),
         tic_turn_generator(get_player_x_y(dimension))
     )
-    for screen in tic_screen_generator:
+    for screen in tic_state_generator:
         print(screen)
 
 

@@ -13,6 +13,12 @@ class TacTurn(NamedTuple):
     index:             int
 
 
+def default_tac(
+        _starting_grid: str
+) -> Generator[str, TacTurn, str]:
+    return tac(is_the_game_complete, move)
+
+
 def tac(
         _is_the_game_complete: Callable[[str], bool],
         _move:                 Move,

@@ -29,48 +29,6 @@ class MoveResult(NamedTuple):
     completed: Optional[CompletedGame]
 
 
-StateGenerator = Generator[str, TicTurn, MoveResult]
-
-
-def default_tic(
-        dimension: int
-) -> StateGenerator:
-    return tic(
-        grid_generator,
-        is_the_game_complete_horizontally,
-        is_the_game_complete_vertically,
-        move,
-        dimension
-    )
-
-
-def tic(
-        _grid_generator:                    GridGenerator,
-        _is_the_game_complete_horizontally: GameCompleteCheck,
-        _is_the_game_complete_vertically:   GameCompleteCheck,
-        _move:                              Move,
-        _dimension:                         int,
-) -> StateGenerator:
-    def _lift_move(turn: TicTurn) -> MoveResult:
-        new_state = _move(turn.icon, turn.current_state, turn.x, turn.y)
-        if (h := _is_the_game_complete_horizontally(new_state)) is not None:
-            return MoveResult(new_state, CompletedGame(h, None))
-        if (v := _is_the_game_complete_vertically(new_state)) is not None:
-            return MoveResult(new_state, CompletedGame(None, v))
-        return MoveResult(new_state, None)
-
-    def _play():
-        state = _grid_generator(_dimension)
-        turn = yield state
-        while True:
-            result = _lift_move(turn)
-            if result.completed is not None:
-                return result
-            turn = yield result.state
-
-    return _play()
-
-
 def move(icon: str, state: str, x: int, y: int) -> str:
     matrix = [list(x) for x in state.split('\n')]
     matrix[y][x] = icon
