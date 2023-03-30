@@ -11,10 +11,6 @@ def is_the_game_complete(state: str) -> bool:
     return len(unique_characters) < 2
 
 
-def a_state_with_rows(rows: List[str]) -> str:
-    return '\n'.join(rows)
-
-
 def move(
         state:             str,
         column_or_row:     ColumnOrRow,
@@ -25,10 +21,24 @@ def move(
 
 
 def transform_line(
-        initial_state:     str,
+        line:              str,
         player_icon:       str,
         other_player_icon: str, ) -> str:
-    pass
+    new_line = ''
+    transform_map = {
+        player_icon:       '*',
+        '*':               other_player_icon,
+        other_player_icon: player_icon,
+    }
+    for character in line:
+        new_line += transform_map[character]
+        if character == other_player_icon:
+            break
+    return new_line + line[len(new_line):]
+
+
+def a_state_with_rows(rows: List[str]) -> str:
+    return '\n'.join(rows)
 
 
 complete_games = [a_state_with_rows(x) for x in [
@@ -77,3 +87,20 @@ def test_it_fills_in_columns():
 
     # assert
     assert result == expected_state
+
+
+def transpose(matrix: List[str]) -> List[str]:
+    return [''.join([matrix[j][i] for j in range(len(matrix))])
+            for i in range(len(matrix[0]))]
+
+
+def test_it_transposes():
+    # arrange
+    matrix = ['123', '456']
+    expected = ['14', '25', '36']
+
+    # act
+    result = transpose(matrix)
+
+    # assert
+    assert result == expected
