@@ -93,7 +93,7 @@ def is_the_game_complete_horizontally(state: str) -> GameComplete:
 
 def is_the_game_complete_vertically(state: str) -> GameComplete:
     if len(state) == 1:
-        return None if state == '*' else 0, state
+        return None if state == '*' else (0, state)
     matrix = [list(x) for x in state.split('\n')]
     first_row = matrix[0]
     for column_index, _ in enumerate(matrix):
