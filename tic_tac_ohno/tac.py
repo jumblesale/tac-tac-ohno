@@ -1,6 +1,8 @@
-from typing import List
+from typing import List, Literal
 
 import pytest
+
+ColumnOrRow = Literal['c', 'r']
 
 
 def is_the_game_complete(state: str) -> bool:
@@ -11,6 +13,10 @@ def is_the_game_complete(state: str) -> bool:
 
 def a_state_with_rows(rows: List[str]) -> str:
     return '\n'.join(rows)
+
+
+def move(state: str, column_or_row: ColumnOrRow, icon: str, index: int):
+    ...
 
 
 complete_games = [a_state_with_rows(x) for x in [
@@ -31,3 +37,17 @@ def test_it_returns_true_when_only_one_icon_is_present(state):
 @pytest.mark.parametrize("state", incomplete_games)
 def test_it_returns_true_when_only_one_icon_is_present(state):
     assert is_the_game_complete(state) is False
+
+
+def test_it_fills_in_columns():
+    # arrange
+    initial_state = a_state_with_rows([
+        '**%&', '%&**', '&&&&', '*%%%', ])
+    expected_state = '\n'.join([
+        '**%*', '%&*%', '&&&*', '*%%&', ])
+
+    # act
+    result = move(initial_state, 'c', '&', 3)
+
+    # assert
+    assert result == expected_state
