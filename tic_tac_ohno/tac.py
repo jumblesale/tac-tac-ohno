@@ -17,7 +17,18 @@ def move(
         player_icon:       str,
         other_player_icon: str,
         index:             int, ) -> str:
-    return '\n'.join(['**%*', '%&*%', '&&&*', '*%%&', ])
+    if column_or_row is not 'c':
+        raise Exception
+    transposed = transpose(state.split('\n'))
+    new_line = transform_line(transposed[index], player_icon, other_player_icon)
+    transposed[index] = new_line
+    return '\n'.join(transpose(transposed))
+    # return '\n'.join(['**%*', '%&*%', '&&&*', '*%%&', ])
+
+
+def transpose(matrix: List[str]) -> List[str]:
+    return [''.join([matrix[j][i] for j in range(len(matrix))])
+            for i in range(len(matrix[0]))]
 
 
 def transform_line(
@@ -78,20 +89,35 @@ def test_it_converts_lines(initial_state: str, expected_state: str, icon_1: str,
 def test_it_fills_in_columns():
     # arrange
     initial_state = a_state_with_rows([
-        '**%&', '%&**', '&&&&', '*%%%', ])
+        '**%&',
+        '%&**',
+        '&&&&',
+        '*%%%', ])
     expected_state = '\n'.join([
-        '**%*', '%&*%', '&&&*', '*%%&', ])
+        '**%*',
+        '%&*%',
+        '&&&*',
+        '*%%&', ])
 
     # act
-    result = move(initial_state, 'c', '&', 3)
+    result = move(initial_state, 'c', '&', '%', 3)
 
     # assert
     assert result == expected_state
 
 
-def transpose(matrix: List[str]) -> List[str]:
-    return [''.join([matrix[j][i] for j in range(len(matrix))])
-            for i in range(len(matrix[0]))]
+def test_it_fills_in_rows():
+    # arrange
+    initial_state = a_state_with_rows([
+        '***^', '^^@*', '^*@@', '**^@', ])
+    expected_state = '\n'.join([
+        '***^', '^^@*', '*@^@', '*%%&', ])
+
+    # act
+    result = move(initial_state, 'r', '^', '@', 2)
+
+    # assert
+    assert result == expected_state
 
 
 def test_it_transposes():
