@@ -1,7 +1,35 @@
 import functools
-from typing import List, Literal
+from typing import List, Literal, Callable, NamedTuple, Generator
 
 ColumnOrRow = Literal['c', 'r']
+Move = Callable[[str, ColumnOrRow, str, str, int], str]
+
+
+class TacTurn(NamedTuple):
+    current_state:     str
+    player_icon:       str
+    other_player_icon: str
+    column_or_row:     ColumnOrRow
+    index:             int
+
+
+def tac(
+        _is_the_game_complete: Callable[[str], bool],
+        _move:                 Move,
+        _starting_grid:        str
+) -> Generator[str, TacTurn, str]:
+    turn: TacTurn = yield _starting_grid
+    while True:
+        new_state = _move(
+            turn.current_state,
+            turn.column_or_row,
+            turn.player_icon,
+            turn.other_player_icon,
+            turn.index
+        )
+        if _is_the_game_complete(new_state):
+            return new_state
+        turn = yield new_state
 
 
 def is_the_game_complete(state: str) -> bool:

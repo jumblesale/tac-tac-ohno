@@ -14,6 +14,11 @@ class Player(NamedTuple):
     icon:   str
 
 
+class InputDisplay(NamedTuple):
+    state:          str
+    current_player: Player
+
+
 def draw(state, current_player: Player, next_player: Player, turn_count: int):
     title = '| TIC, TAC, OH NO |'
     info_box_width = 36
@@ -69,23 +74,34 @@ def get_player_x_y(maximum: int) -> XYInput:
     return _get_x_y
 
 
-def game(
-    alpha_player:     Player,
-    omega_player:     Player,
-    state_generator:  StateGenerator,
-    x_y_input:        XYInput,
+def tic_turn_generator(
+    x_y_input: XYInput,
+) -> Generator[TicTurn, InputDisplay, None]:
+    input_display: InputDisplay = yield
+    while True:
+        x, y = x_y_input(input_display.current_player.icon)
+        input_display = yield TicTurn(
+            input_display.state, input_display.current_player.icon, x, y
+        )
+
+
+def tic_game(
+    alpha_player:        Player,
+    omega_player:        Player,
+    tic_state_generator: StateGenerator,
+    _tic_turn_generator: Generator[TicTurn, InputDisplay, None],
 ):
     player_generator = itertools.cycle(
         [(omega_player, alpha_player), (alpha_player, omega_player)])
-    state = next(state_generator)
+    state = next(tic_state_generator)
+    next(_tic_turn_generator)
     current_player, next_player = alpha_player, omega_player
     turn_count = 0
     yield draw(state, alpha_player, omega_player, turn_count)
     while True:
-        x, y = x_y_input(current_player.player)
-        turn = TicTurn(state, current_player.icon, x, y)
+        turn = _tic_turn_generator.send(InputDisplay(state, current_player))
         try:
-            state = state_generator.send(turn)
+            state = tic_state_generator.send(turn)
         except StopIteration as ex:
             yield draw(ex.value.state, current_player, next_player, turn_count)
             return ex.value
@@ -96,6 +112,7 @@ def game(
 
 def main():
     def _get_dimension():
+        return 4
         _max = 9
         _min = 2
         _dimension = int(input('How big should the grid be? '))
@@ -107,19 +124,21 @@ def main():
             return _get_dimension()
         return _dimension
     dimension = _get_dimension()
-    alpha_icon = input('Player ⍺, choose an icon: ')
-    omega_icon = input('Player Ω, choose an icon: ')
+    # alpha_icon = input('Player ⍺, choose an icon: ')
+    # omega_icon = input('Player Ω, choose an icon: ')
+    alpha_icon = '@'
+    omega_icon = 'O'
     alpha = Player('⍺', alpha_icon)
     omega = Player('Ω', omega_icon)
     icon_to_player_map = {
         alpha_icon: alpha,
         omega_icon: omega,
     }
-    tic_screen_generator = game(
+    tic_screen_generator = tic_game(
         alpha,
         omega,
         default_tic(dimension),
-        get_player_x_y(dimension),
+        tic_turn_generator(get_player_x_y(dimension))
     )
     for screen in tic_screen_generator:
         print(screen)
