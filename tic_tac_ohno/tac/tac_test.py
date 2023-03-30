@@ -1,8 +1,7 @@
 from typing import List
-
 import pytest
 
-from tic_tac_ohno.tac.tac import ColumnOrRow, transpose, move, transform_line, is_the_game_complete, valid_move
+from tic_tac_ohno.tac.tac import ColumnOrRow, transpose, move, transform_line, is_the_game_complete, valid_move, replace
 
 
 def a_state_with_rows(rows: List[str]) -> str:

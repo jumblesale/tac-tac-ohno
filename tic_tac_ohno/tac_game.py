@@ -6,7 +6,7 @@ from tic_tac_ohno.tac.tac import TacTurn
 ColumnOrRow = Literal['column', 'row']
 RowColumnInput = Callable[[str], Tuple[ColumnOrRow, int]]
 TacStateGenerator = Generator[str, TacTurn, None]
-ColumnRowInput = Callable[[int], Tuple[ColumnOrRow, int]]
+ColumnRowInput = Callable[[str], Tuple[ColumnOrRow, int]]
 TacTurnGenerator = Generator[TacTurn, InputDisplay, None]
 ValidMoveCheck = Callable[[str, str, ColumnOrRow, int], bool]
 

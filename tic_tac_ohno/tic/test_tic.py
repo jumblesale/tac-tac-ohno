@@ -1,9 +1,9 @@
 from typing import List
 import pytest
-from tic_tac_ohno.tic import is_the_game_complete_horizontally,\
-                             is_the_game_complete_vertically,\
-                             grid_generator,\
-                             move
+from tic_tac_ohno.tic.tic import is_the_game_complete_horizontally,\
+                                 is_the_game_complete_vertically,\
+                                 grid_generator,\
+                                 move
 
 
 def a_blank_state(dimension: int) -> str:

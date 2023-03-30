@@ -15,7 +15,7 @@ class TacTurn(NamedTuple):
 
 
 def valid_move(*args):
-    ...
+    return False
 
 
 def default_tac(
