@@ -25,11 +25,5 @@ incomplete_games = [a_state_with_rows(x) for x in [
 
 @pytest.mark.parametrize("state", complete_games)
 def test_it_returns_true_when_only_one_icon_is_present(state):
-    # arrange
-    expected_result = True
+    assert is_the_game_complete(state) is True
 
-    # act
-    result = is_the_game_complete(state)
-
-    # assert
-    assert result == expected_result
