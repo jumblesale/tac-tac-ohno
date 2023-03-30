@@ -1,14 +1,14 @@
-def how_many_neighbours(state: str):
-    return 0
+def is_the_game_complete(state: str) -> bool:
+    return False
 
 
-def test_it_returns_0_for_a_state_with_no_neighbours():
+def test_it_returns_true_when_only_one_icon_is_present():
     # arrange
     state = ['***', '*&*', '***']
-    expected_neighbours = 0
+    expected_result = True
 
     # act
-    result = how_many_neighbours(state)
+    result = is_the_game_complete(state)
 
     # assert
-    assert result == expected_neighbours
+    assert result == expected_result
