@@ -1,7 +1,9 @@
 import itertools
 
 from tic_tac_ohno.game_lib import Player, InputDisplay
-from tic_tac_ohno.tic_game import TicTurnGenerator, tic_turn_generator, get_player_x_y, TicStateGenerator, default_tic
+from tic_tac_ohno.tac.tac import default_tac
+from tic_tac_ohno.tac_game import tac_turn_generator, get_column_or_row_index
+from tic_tac_ohno.tic_game import tic_turn_generator, get_player_x_y, default_tic
 
 
 def draw(state, current_player: Player, next_player: Player, turn_count: int):
@@ -40,22 +42,19 @@ def draw(state, current_player: Player, next_player: Player, turn_count: int):
 
 
 def game(
-    alpha_player:        Player,
-    omega_player:        Player,
-    tic_state_generator: TicStateGenerator,
-    _tic_turn_generator: TicTurnGenerator,
+    player_generator,
+    state_generator,
+    turn_generator,
 ):
-    player_generator = itertools.cycle(
-        [(omega_player, alpha_player), (alpha_player, omega_player)])
-    state = next(tic_state_generator)
-    next(_tic_turn_generator)
-    current_player, next_player = alpha_player, omega_player
+    state = next(state_generator)
+    next(turn_generator)
+    current_player, next_player = next(player_generator)
     turn_count = 0
-    yield draw(state, alpha_player, omega_player, turn_count)
+    yield draw(state, current_player, next_player, turn_count)
     while True:
-        turn = _tic_turn_generator.send(InputDisplay(state, current_player))
+        turn = turn_generator.send(InputDisplay(state, current_player))
         try:
-            state = tic_state_generator.send(turn)
+            state = state_generator.send(turn)
         except StopIteration as ex:
             yield draw(ex.value.state, current_player, next_player, turn_count)
             return ex.value
@@ -84,13 +83,19 @@ def main():
     omega_icon = 'O'
     alpha = Player('⍺', alpha_icon)
     omega = Player('Ω', omega_icon)
+    player_generator = itertools.cycle(
+        [(alpha, omega), (omega, alpha)])
     tic_state_generator = game(
-        alpha,
-        omega,
+        player_generator,
         default_tic(dimension),
         tic_turn_generator(get_player_x_y(dimension))
     )
-    for screen in tic_state_generator:
+    tac_state_generator = game(
+        player_generator,
+        default_tac('\n'.join(['@O@@', 'OOOO', '@**O', 'O@**'])),
+        tac_turn_generator(get_column_or_row_index(dimension))
+    )
+    for screen in tac_state_generator:
         print(screen)
 
 

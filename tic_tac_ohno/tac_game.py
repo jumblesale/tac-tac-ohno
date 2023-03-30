@@ -7,9 +7,14 @@ ColumnOrRow = Literal['column', 'row']
 RowColumnInput = Callable[[str], Tuple[ColumnOrRow, int]]
 TacStateGenerator = Generator[str, TacTurn, None]
 ColumnRowInput = Callable[[int], Tuple[ColumnOrRow, int]]
+TacTurnGenerator = Generator[TacTurn, InputDisplay, None]
+ValidMoveCheck = Callable[[str, str, ColumnOrRow, int], bool]
 
 
-def get_column_or_row_index(maximum: int) -> ColumnRowInput:
+def get_column_or_row_index(
+        maximum:     int,
+        _valid_move: ValidMoveCheck,
+) -> ColumnRowInput:
     _input = get_bounded_player_input(maximum)
 
     def _get_column_or_row(_current_player_icon: str):
@@ -17,8 +22,8 @@ def get_column_or_row_index(maximum: int) -> ColumnRowInput:
         if _column_or_row[0].lower() not in 'cr':
             print(f"I don't understand {_column_or_row} - please choose from [cr]")
             return _get_column_or_row(_current_player_icon)
-        _prompt = 'column' if _column_or_row is 'c' else 'row'
-        _index = _input(f'Which {_prompt}?')
+        _prompt = 'column' if _column_or_row == 'c' else 'row'
+        _index = _input(f'Which {_prompt}? ')
         return _column_or_row, _index
     return _get_column_or_row
 
@@ -37,7 +42,7 @@ def tac_turn_generator(
 def tac_game(
     alpha_player:        Player,
     omega_player:        Player,
-    tac_state_generator: StateGenerator,
+    tac_state_generator: TacStateGenerator,
     _tac_turn_generator: TacTurnGenerator,
 ):
     state = next(tac_state_generator)

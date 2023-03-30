@@ -1,6 +1,8 @@
-from tic_tac_ohno.tac import *
+from typing import List
 
 import pytest
+
+from tic_tac_ohno.tac.tac import ColumnOrRow, transpose, move, transform_line, is_the_game_complete, valid_move
 
 
 def a_state_with_rows(rows: List[str]) -> str:
@@ -97,3 +99,16 @@ def test_it_replaces_lines():
 
     # assert
     assert result == expected
+
+
+invalid_moves = [
+    (a_state_with_rows(['***', '***', '***']), 'c', 'Z', 0),
+    (a_state_with_rows(['*i*', '***', '***']), 'c', 'Z', 1),
+    (a_state_with_rows(['***', '***', '***']), 'r', 'F', 0),
+    (a_state_with_rows(['***', '*p*', '***']), 'r', 'F', 1),
+]
+
+
+@pytest.mark.parametrize("state, column_or_row, icon, index", invalid_moves)
+def test_it_rejects_invalid_moves(state: str, column_or_row: ColumnOrRow, icon: str, index: int):
+    assert valid_move(state, column_or_row, icon, index) is False

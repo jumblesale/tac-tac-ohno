@@ -3,6 +3,7 @@ from typing import List, Literal, Callable, NamedTuple, Generator
 
 ColumnOrRow = Literal['c', 'r']
 Move = Callable[[str, ColumnOrRow, str, str, int], str]
+ValidMoveCheck = Callable[[str, ColumnOrRow, int], bool]
 
 
 class TacTurn(NamedTuple):
@@ -13,16 +14,21 @@ class TacTurn(NamedTuple):
     index:             int
 
 
+def valid_move(*args):
+    ...
+
+
 def default_tac(
         _starting_grid: str
 ) -> Generator[str, TacTurn, str]:
-    return tac(is_the_game_complete, move)
+    return tac(is_the_game_complete, move, _starting_grid)
 
 
 def tac(
         _is_the_game_complete: Callable[[str], bool],
         _move:                 Move,
-        _starting_grid:        str
+        _valid_move:           Callable[[ColumnOrRow, int], bool],
+        _starting_grid:        str,
 ) -> Generator[str, TacTurn, str]:
     turn: TacTurn = yield _starting_grid
     while True:
