@@ -4,7 +4,9 @@ from typing import Literal
 from tic_tac_ohno.tic import *
 
 Players = Literal['⍺', 'Ω']
-XY = Callable[[str], Tuple[int, int]]
+XYInput = Callable[[str], Tuple[int, int]]
+RowOrColumn = Literal['row', 'column']
+RowColumnInput = Callable[[str], Tuple[RowOrColumn, int]]
 
 
 class Player(NamedTuple):
@@ -47,7 +49,7 @@ def draw(state, current_player: Player, next_player: Player, turn_count: int):
 """
 
 
-def get_player_x_y(maximum: int) -> XY:
+def get_player_x_y(maximum: int) -> XYInput:
 
     def _out_of_bounds(x_or_y: int):
         nonlocal maximum
@@ -68,10 +70,11 @@ def get_player_x_y(maximum: int) -> XY:
 
 
 def game(
-    alpha_player:    Player,
-    omega_player:    Player,
-    state_generator: StateGenerator,
-    x_y:             XY,
+    alpha_player:     Player,
+    omega_player:     Player,
+    state_generator:  StateGenerator,
+    x_y_input:        XYInput,
+    row_column_input: RowColumnInput,
 ):
     player_generator = itertools.cycle(
         [(omega_player, alpha_player), (alpha_player, omega_player)])
@@ -80,12 +83,12 @@ def game(
     turn_count = 0
     yield draw(state, alpha_player, omega_player, turn_count)
     while True:
-        x, y = x_y(current_player.player)
+        x, y = x_y_input(current_player.player)
         turn = Turn(state, current_player.icon, x, y)
         try:
             state = state_generator.send(turn)
         except StopIteration as ex:
-            print(draw(ex.value.state, current_player, next_player, turn_count))
+            yield draw(ex.value.state, current_player, next_player, turn_count)
             return ex.value
         turn_count += 1
         current_player, next_player = next(player_generator)
@@ -105,17 +108,17 @@ def main():
     omega_icon = input('Player Ω, choose an icon: ')
     alpha = Player('⍺', alpha_icon)
     omega = Player('Ω', omega_icon)
-    players = {
-        alpha_icon: Player('⍺', alpha_icon),
-        omega_icon: Player('Ω', omega_icon),
+    icon_to_player_map = {
+        alpha_icon: alpha,
+        omega_icon: omega,
     }
-    screen_generator = game(
+    tic_screen_generator = game(
         alpha,
         omega,
         default_tic(dimension),
         get_player_x_y(dimension),
     )
-    for screen in screen_generator:
+    for screen in tic_screen_generator:
         print(screen)
 
 
