@@ -1,13 +1,28 @@
 import itertools
-from typing import Callable, Generator, Tuple
+from typing import Callable, Generator, Tuple, NamedTuple
 
-from tic_tac_ohno.game_lib import Player, InputDisplay, get_bounded_player_input
-from tic_tac_ohno.tic.tic import TicTurn, MoveResult, GridGenerator, GameCompleteCheck, Move, CompletedGame, \
-    grid_generator, is_the_game_complete_horizontally, is_the_game_complete_vertically, move
+from tic_tac_ohno.game_lib import GameState, get_bounded_player_input
+from tic_tac_ohno.tic.tic import MoveResult, GridGenerator, GameCompleteCheck, Move, CompletedGame, grid_generator,\
+    is_the_game_complete_horizontally, is_the_game_complete_vertically, move
 
 XYInput = Callable[[str], Tuple[int, int]]
-TicTurnGenerator = Generator[TicTurn, InputDisplay, None]
+
+
+class TicTurn(NamedTuple):
+    current_state: str
+    icon:          str
+    x:             int
+    y:             int
+
+
+TicTurnGenerator = Generator[TicTurn, GameState, None]
 TicStateGenerator = Generator[str, TicTurn, MoveResult]
+Tic = Callable[[
+    GridGenerator,
+    GameCompleteCheck,
+    GameCompleteCheck,
+    Callable[[str], str]
+], str]
 
 
 def get_player_x_y(maximum: int) -> XYInput:
@@ -22,8 +37,8 @@ def get_player_x_y(maximum: int) -> XYInput:
 
 def tic_turn_generator(
     x_y_input: XYInput,
-) -> Generator[TicTurn, InputDisplay, None]:
-    input_display: InputDisplay = yield
+) -> TicTurnGenerator:
+    input_display: GameState = yield
     while True:
         x, y = x_y_input(input_display.current_player.icon)
         input_display = yield TicTurn(
@@ -56,42 +71,6 @@ def tic(
             turn = yield result.state
 
     return _play()
-
-
-def main():
-    def _get_dimension():
-        return 4
-        _max = 9
-        _min = 2
-        _dimension = int(input('How big should the grid be? '))
-        if _dimension > _max:
-            print(f'Maximum dimension is {_max}')
-            return _get_dimension()
-        if _dimension < _min:
-            print(f'Minimum dimension is {_min}')
-            return _get_dimension()
-        return _dimension
-    dimension = _get_dimension()
-    # alpha_icon = input('Player ⍺, choose an icon: ')
-    # omega_icon = input('Player Ω, choose an icon: ')
-    alpha_icon = '@'
-    omega_icon = 'O'
-    alpha = Player('⍺', alpha_icon)
-    omega = Player('Ω', omega_icon)
-    tic_state_generator = tic_game(
-        alpha,
-        omega,
-        default_tic(dimension),
-        tic_turn_generator(get_player_x_y(dimension))
-    )
-    tac_state_generator = tac_game(
-        alpha,
-        omega,
-        default_tac,
-        tac_turn_generator(get_column_or_row_index(dimension))
-    )
-    for screen in tac_state_generator:
-        print(screen)
 
 
 def default_tic(

@@ -3,20 +3,7 @@ from typing import Optional, Tuple, Callable, NamedTuple, List, Generator
 GridGenerator = Callable[[int], str]
 GameComplete = Optional[Tuple[int, str]]
 GameCompleteCheck = Callable[[str], GameComplete]
-Tic = Callable[[
-    GridGenerator,
-    GameCompleteCheck,
-    GameCompleteCheck,
-    Callable[[str], str]
-], str]
 Move = Callable[[str, str, int, int], str]
-
-
-class TicTurn(NamedTuple):
-    current_state: str
-    icon:          str
-    x:             int
-    y:             int
 
 
 class CompletedGame(NamedTuple):

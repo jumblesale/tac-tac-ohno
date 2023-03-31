@@ -1,8 +1,7 @@
 import itertools
 
-from tic_tac_ohno.game_lib import Player, InputDisplay
-from tic_tac_ohno.tac.tac import default_tac
-from tic_tac_ohno.tac_game import tac_turn_generator, get_column_or_row_index
+from tic_tac_ohno.game_lib import Player, GameState
+from tic_tac_ohno.tac_game import tac_turn_generator, get_column_or_row_index, default_tac
 from tic_tac_ohno.tic_game import tic_turn_generator, get_player_x_y, default_tic
 
 
@@ -52,7 +51,8 @@ def game(
     turn_count = 0
     yield draw(state, current_player, next_player, turn_count)
     while True:
-        turn = turn_generator.send(InputDisplay(state, current_player))
+        game_state = GameState(state, current_player, next_player)
+        turn = turn_generator.send(game_state)
         try:
             state = state_generator.send(turn)
         except StopIteration as ex:
@@ -90,13 +90,10 @@ def main():
         default_tic(dimension),
         tic_turn_generator(get_player_x_y(dimension))
     )
-    tac_state_generator = game(
-        player_generator,
-        default_tac('\n'.join(['@O@@', 'OOOO', '@**O', 'O@**'])),
-        tac_turn_generator(get_column_or_row_index(dimension))
-    )
-    for screen in tac_state_generator:
-        print(screen)
+    _tac_turn_generator, _tac_state_generator = default_tac(
+        '\n'.join(['@O@@', 'OOOO', '@**O', 'O@**']))
+    for state in game(player_generator, _tac_state_generator, _tac_turn_generator):
+        print(state)
 
 
 if __name__ == '__main__':

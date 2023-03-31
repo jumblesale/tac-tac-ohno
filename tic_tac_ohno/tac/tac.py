@@ -3,48 +3,14 @@ from typing import List, Literal, Callable, NamedTuple, Generator
 
 ColumnOrRow = Literal['c', 'r']
 Move = Callable[[str, ColumnOrRow, str, str, int], str]
-ValidMoveCheck = Callable[[str, ColumnOrRow, int], bool]
+ValidMoveCheck = Callable[[str, ColumnOrRow, str, int], bool]
 
 
-class TacTurn(NamedTuple):
-    current_state:     str
-    player_icon:       str
-    other_player_icon: str
-    column_or_row:     ColumnOrRow
-    index:             int
-
-
-def valid_move(state: str, column_or_row: ColumnOrRow, icon: str, index: int):
+def valid_move(state: str, column_or_row: ColumnOrRow, icon: str, index: int) -> bool:
     matrix = [list(x) for x in state.split('\n')]
     if column_or_row == 'c':
         return matrix[0][index] == icon
     return matrix[index][0] == icon
-
-
-def default_tac(
-        _starting_grid: str
-) -> Generator[str, TacTurn, str]:
-    return tac(is_the_game_complete, move, _starting_grid)
-
-
-def tac(
-        _is_the_game_complete: Callable[[str], bool],
-        _move:                 Move,
-        _valid_move:           Callable[[ColumnOrRow, int], bool],
-        _starting_grid:        str,
-) -> Generator[str, TacTurn, str]:
-    turn: TacTurn = yield _starting_grid
-    while True:
-        new_state = _move(
-            turn.current_state,
-            turn.column_or_row,
-            turn.player_icon,
-            turn.other_player_icon,
-            turn.index
-        )
-        if _is_the_game_complete(new_state):
-            return new_state
-        turn = yield new_state
 
 
 def is_the_game_complete(state: str) -> bool:
@@ -53,14 +19,15 @@ def is_the_game_complete(state: str) -> bool:
     return len(unique_characters) < 2
 
 
-def move(state:             str,
-         column_or_row:     ColumnOrRow,
-         player_icon:       str,
-         other_player_icon: str,
-         index:             int, ) -> str:
+def move(
+        state:             str,
+        column_or_row:     ColumnOrRow,
+        player_icon:       str,
+        other_player_icon: str,
+        index:             int, ) -> str:
     matrix = state.split('\n')
     partial_transform_row = functools.partial(transform_row, player_icon, other_player_icon, index)
-    if column_or_row is 'c':
+    if column_or_row == 'c':
         updated_matrix = transpose(partial_transform_row(transpose(matrix)))
     else:
         updated_matrix = partial_transform_row(matrix)
