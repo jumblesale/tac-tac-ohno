@@ -1,7 +1,7 @@
 from typing import Generator, Literal, Callable, Tuple, cast, NamedTuple
 
 from tic_tac_ohno.game_lib import GameState, Player, get_bounded_player_input
-from tic_tac_ohno.tac.tac import Move, is_the_game_complete, valid_move, move, ValidMoveCheck
+from tic_tac_ohno.tac.tac import Move, is_the_game_complete, valid_move, move, ValidMoveCheck, GameCompleteCheck
 
 ColumnOrRow = Literal['c', 'r']
 RowColumnInput = Callable[[str], Tuple[ColumnOrRow, int]]
@@ -80,7 +80,7 @@ def lift_valid_move(
 
 
 def tac_state_generator(
-    _is_the_game_complete: Callable[[str], bool],
+    _is_the_game_complete: GameCompleteCheck,
     _move:                 Move,
     _starting_grid:        str,
 ) -> Callable[[], TacStateGenerator]:
@@ -93,7 +93,7 @@ def tac_state_generator(
             turn.other_player_icon,
             turn.index
         )
-        if _is_the_game_complete(new_state):
+        if _is_the_game_complete(new_state, turn.icon):
             return new_state
         turn = yield new_state
 

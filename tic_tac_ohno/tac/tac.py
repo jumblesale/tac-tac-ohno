@@ -3,17 +3,26 @@ from typing import List, Literal, Callable, NamedTuple, Generator
 
 ColumnOrRow = Literal['c', 'r']
 Move = Callable[[str, ColumnOrRow, str, str, int], str]
+GameCompleteCheck = Callable[[str, str], bool]
 ValidMoveCheck = Callable[[str, ColumnOrRow, str, int], bool]
 
 
+def state_to_list_of_lists(state: str) -> List[List[str]]:
+    return [list(x) for x in state.split('\n')]
+
+
 def valid_move(state: str, column_or_row: ColumnOrRow, icon: str, index: int) -> bool:
-    matrix = [list(x) for x in state.split('\n')]
+    matrix = state_to_list_of_lists(state)
     if column_or_row == 'c':
         return matrix[0][index] == icon
     return matrix[index][0] == icon
 
 
-def is_the_game_complete(state: str) -> bool:
+def is_the_game_complete(state: str, current_player_icon: str) -> bool:
+    matrix = state_to_list_of_lists(state)
+    if all([x != current_player_icon for x in matrix[0]] +
+           [y[0] != current_player_icon for y in matrix]):
+        return True
     unique_characters = set(''.join(state.split('\n')))
     unique_characters.discard('*')
     return len(unique_characters) < 2

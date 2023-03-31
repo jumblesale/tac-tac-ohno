@@ -8,25 +8,25 @@ def a_state_with_rows(rows: List[str]) -> str:
     return '\n'.join(rows)
 
 
-complete_games = [a_state_with_rows(x) for x in [
-    ['***', '*&*', '***'],
-    ['***', '***', '***'],
-    ['&&&', '&&&', '&&&'],
-    ['***', '*$$', '*&&']]]
+complete_games = [(a_state_with_rows(x[0]), x[1]) for x in [
+    (['***', '*&*', '***'], '&'),
+    (['***', '***', '***'], '&'),
+    (['&&&', '&&&', '&&&'], '&'),
+    (['***', '*$$', '*&&'], '&'), ]]
 
-incomplete_games = [a_state_with_rows(x) for x in [
-    ['***', '***', '*0q'],
-    ['ppp', 'ppp', 'ppy'], ]]
-
-
-@pytest.mark.parametrize("state", complete_games)
-def test_it_returns_true_when_there_are_no_more_valid_moves(state):
-    assert is_the_game_complete(state) is True
+incomplete_games = [(a_state_with_rows(x[0]), x[1]) for x in [
+    (['*&*', '***', '**0'], '&'),
+    (['ppp', 'ppp', 'ppy'], 'p'), ]]
 
 
-@pytest.mark.parametrize("state", incomplete_games)
-def test_it_returns_false_when_there_are_still_valid_moves(state):
-    assert is_the_game_complete(state) is False
+@pytest.mark.parametrize("state, player_icon", complete_games)
+def test_it_returns_true_when_there_are_no_more_valid_moves(state: str, player_icon: str):
+    assert is_the_game_complete(state, player_icon) is True
+
+
+@pytest.mark.parametrize("state, player_icon", incomplete_games)
+def test_it_returns_false_when_there_are_still_valid_moves(state: str, player_icon: str):
+    assert is_the_game_complete(state, player_icon) is False
 
 
 line_transformations = [
