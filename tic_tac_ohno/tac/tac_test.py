@@ -11,7 +11,8 @@ def a_state_with_rows(rows: List[str]) -> str:
 complete_games = [a_state_with_rows(x) for x in [
     ['***', '*&*', '***'],
     ['***', '***', '***'],
-    ['&&&', '&&&', '&&&'], ]]
+    ['&&&', '&&&', '&&&'],
+    ['***', '*$$', '*&&']]]
 
 incomplete_games = [a_state_with_rows(x) for x in [
     ['***', '***', '*0q'],
@@ -19,12 +20,12 @@ incomplete_games = [a_state_with_rows(x) for x in [
 
 
 @pytest.mark.parametrize("state", complete_games)
-def test_it_returns_true_when_only_one_icon_is_present(state):
+def test_it_returns_true_when_there_are_no_more_valid_moves(state):
     assert is_the_game_complete(state) is True
 
 
 @pytest.mark.parametrize("state", incomplete_games)
-def test_it_returns_true_when_only_one_icon_is_present(state):
+def test_it_returns_false_when_there_are_still_valid_moves(state):
     assert is_the_game_complete(state) is False
 
 
