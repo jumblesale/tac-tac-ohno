@@ -44,7 +44,7 @@ def get_column_or_row_index(
 def tac_turn_generator(
     _column_row_input: ColumnRowInput,
     _valid_move_check: TacTurnChecker
-) -> Callable[[], TacTurnGenerator]:
+) -> TacTurnGenerator:
     game_state: GameState = yield
     while True:
         column_or_row, index = _column_row_input(game_state.current_player.icon)
@@ -59,15 +59,6 @@ def tac_turn_generator(
             column_or_row,
             index
         )
-
-
-def tac_game(
-    alpha_player:        Player,
-    omega_player:        Player,
-    _tac_state_generator: TacStateGenerator,
-    _tac_turn_generator: TacTurnGenerator,
-):
-    return 'hello'
 
 
 def lift_valid_move(_valid_move: ValidMoveCheck) -> Callable[[GameState, ColumnOrRow, int], bool]:
@@ -114,11 +105,11 @@ def tac(
 
 
 def default_tac(
-    starting_grid: str,
+    starting_grid:    str,
 ) -> Tuple[TacTurnGenerator, TacStateGenerator]:
     return tac(
         is_the_game_complete,
         move,
         lift_valid_move(valid_move),
-        starting_grid
+        starting_grid,
     )

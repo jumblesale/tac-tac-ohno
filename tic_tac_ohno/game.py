@@ -43,8 +43,8 @@ def draw(title: str, state: str, current_player: Player, next_player: Player, tu
 def turn_count_generator():
     count = 0
     while True:
-        count += 1
         yield count
+        count += 1
 
 
 def consume_generator(generator):
@@ -74,7 +74,9 @@ def game(
             state = state_generator.send(turn)
         except StopIteration as ex:
             yield draw(title, ex.value, current_player, next_player, turn_count)
-            return ex.value
+            # discard the next player
+            next(player_generator)
+            return ex.value, next_player.icon
         turn_count = next(_turn_count_generator)
         current_player, next_player = next(player_generator)
         yield draw(title, state, current_player, next_player, turn_count)
@@ -110,9 +112,9 @@ def main():
         player_generator,
         _tic_state_generator,
         _tic_turn_generator,
-        _turn_count_generator
+        _turn_count_generator,
     )
-    final_state = consume_generator(tic_game)
+    final_state, next_player_icon = consume_generator(tic_game)
 
     _tac_turn_generator, _tac_state_generator = default_tac(final_state)
     tac_game = game(
@@ -120,7 +122,7 @@ def main():
         player_generator,
         _tac_state_generator,
         _tac_turn_generator,
-        _turn_count_generator
+        _turn_count_generator,
     )
     final_state = consume_generator(tac_game)
 
