@@ -5,8 +5,8 @@ from tic_tac_ohno.tac_game import tac_turn_generator, get_column_or_row_index, d
 from tic_tac_ohno.tic_game import tic_turn_generator, get_player_x_y, default_tic
 
 
-def draw(state, current_player: Player, next_player: Player, turn_count: int):
-    title = '| TIC, TAC, OH NO |'
+def draw(title: str, state: str, current_player: Player, next_player: Player, turn_count: int):
+    title = f'| {title} |'
     info_box_width = 36
     new_line = '\n'
 
@@ -40,32 +40,49 @@ def draw(state, current_player: Player, next_player: Player, turn_count: int):
 """
 
 
+def turn_count_generator():
+    count = 0
+    while True:
+        count += 1
+        yield count
+
+
+def consume_generator(generator):
+    while True:
+        try:
+            print(next(generator))
+        except StopIteration as ex:
+            return ex.value
+
+
 def game(
+    title: str,
     player_generator,
     state_generator,
     turn_generator,
+    _turn_count_generator,
 ):
     state = next(state_generator)
     next(turn_generator)
+    turn_count = next(_turn_count_generator)
     current_player, next_player = next(player_generator)
-    turn_count = 0
-    yield draw(state, current_player, next_player, turn_count)
+    yield draw(title, state, current_player, next_player, turn_count)
     while True:
         game_state = GameState(state, current_player, next_player)
         turn = turn_generator.send(game_state)
         try:
             state = state_generator.send(turn)
         except StopIteration as ex:
-            yield draw(ex.value.state, current_player, next_player, turn_count)
+            yield draw(title, ex.value, current_player, next_player, turn_count)
             return ex.value
-        turn_count += 1
+        turn_count = next(_turn_count_generator)
         current_player, next_player = next(player_generator)
-        yield draw(state, current_player, next_player, turn_count)
+        yield draw(title, state, current_player, next_player, turn_count)
 
 
 def main():
     def _get_dimension():
-        return 4
+        return 2
         _max = 9
         _min = 2
         _dimension = int(input('How big should the grid be? '))
@@ -85,15 +102,27 @@ def main():
     omega = Player('Ω', omega_icon)
     player_generator = itertools.cycle(
         [(alpha, omega), (omega, alpha)])
-    tic_state_generator = game(
+    _turn_count_generator = turn_count_generator()
+
+    _tic_state_generator, _tic_turn_generator = default_tic(dimension)
+    tic_game = game(
+        'TIC, tac, oh no!',
         player_generator,
-        default_tic(dimension),
-        tic_turn_generator(get_player_x_y(dimension))
+        _tic_state_generator,
+        _tic_turn_generator,
+        _turn_count_generator
     )
-    _tac_turn_generator, _tac_state_generator = default_tac(
-        '\n'.join(['@O@@', 'OOOO', '@**O', 'O@**']))
-    for state in game(player_generator, _tac_state_generator, _tac_turn_generator):
-        print(state)
+    final_state = consume_generator(tic_game)
+
+    _tac_turn_generator, _tac_state_generator = default_tac(final_state)
+    tac_game = game(
+        'tic, TAC, oh no!',
+        player_generator,
+        _tac_state_generator,
+        _tac_turn_generator,
+        _turn_count_generator
+    )
+    final_state = consume_generator(tac_game)
 
 
 if __name__ == '__main__':

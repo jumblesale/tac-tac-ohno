@@ -63,50 +63,50 @@ non_complete_columns = [
 
 @pytest.mark.parametrize('state', non_complete_states + non_complete_rows)
 def test_the_game_is_not_finished_when_there_are_incomplete_rows(state):
-    assert is_the_game_complete_horizontally(state) is None
+    assert is_the_game_complete_horizontally(state) is False
 
 
 @pytest.mark.parametrize('state', non_complete_states + non_complete_columns)
 def test_the_game_is_not_finished_when_there_are_incomplete_columns(state):
-    assert is_the_game_complete_vertically(state) is None
+    assert is_the_game_complete_vertically(state) is False
 
 
 complete_states_rows = [
-    (a_state_with_rows(['p']),    (0, 'p')),
-    (a_state_with_rows(['**',
-                        '55', ]), (1, '5')),
-    (a_state_with_rows(['qq',
-                        '*q', ]), (0, 'q')),
-    (a_state_with_rows(['zzzz*',
-                        ';;*;;',
-                        'zzzz*',
-                        ';;;;;',
-                        '*****', ]), (3, ';')), ]
+    a_state_with_rows(['p']),
+    a_state_with_rows(['**',
+                       '55', ]),
+    a_state_with_rows(['qq',
+                       '*q', ]),
+    a_state_with_rows(['zzzz*',
+                       ';;*;;',
+                       'zzzz*',
+                       ';;;;;',
+                       '*****', ]), ]
 
 
-@pytest.mark.parametrize('state, expected', complete_states_rows)
-def test_the_game_is_finished_when_there_is_a_row_of_the_same_icon(state, expected):
-    assert is_the_game_complete_horizontally(state) == expected
+@pytest.mark.parametrize('state', complete_states_rows)
+def test_the_game_is_finished_when_there_is_a_row_of_the_same_icon(state):
+    assert is_the_game_complete_horizontally(state) is True
 
 
 complete_states_columns = [
-    (a_state_with_rows(['¥']),    (0, '¥')),
-    (a_state_with_rows(['.,',
-                        '.*', ]), (0, '.')),
-    (a_state_with_rows(['.q',
-                        '*q', ]), (1, 'q')),
-    (a_state_with_rows(['S%',
-                        '*%', ]), (1, '%')),
-    (a_state_with_rows(['***#*',
-                        '^**#*',
-                        '*^*#*',
-                        '**^#*',
-                        '***#*', ]), (3, '#')), ]
+    a_state_with_rows(['¥']),
+    a_state_with_rows(['.,',
+                       '.*', ]),
+    a_state_with_rows(['.q',
+                       '*q', ]),
+    a_state_with_rows(['S%',
+                       '*%', ]),
+    a_state_with_rows(['***#*',
+                       '^**#*',
+                       '*^*#*',
+                       '**^#*',
+                       '***#*', ]), ]
 
 
-@pytest.mark.parametrize('state, expected', complete_states_columns)
-def test_the_game_is_finished_when_there_is_a_column_of_the_same_icon(state, expected):
-    assert is_the_game_complete_vertically(state) == expected
+@pytest.mark.parametrize('state', complete_states_columns)
+def test_the_game_is_finished_when_there_is_a_column_of_the_same_icon(state):
+    assert is_the_game_complete_vertically(state) is True
 
 
 def test_moving_applies_an_icon_to_a_location():

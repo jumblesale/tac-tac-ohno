@@ -2,7 +2,7 @@ import itertools
 from typing import Callable, Generator, Tuple, NamedTuple
 
 from tic_tac_ohno.game_lib import GameState, get_bounded_player_input
-from tic_tac_ohno.tic.tic import MoveResult, GridGenerator, GameCompleteCheck, Move, CompletedGame, grid_generator,\
+from tic_tac_ohno.tic.tic import GridGenerator, GameCompleteCheck, Move, grid_generator,\
     is_the_game_complete_horizontally, is_the_game_complete_vertically, move
 
 XYInput = Callable[[str], Tuple[int, int]]
@@ -16,7 +16,7 @@ class TicTurn(NamedTuple):
 
 
 TicTurnGenerator = Generator[TicTurn, GameState, None]
-TicStateGenerator = Generator[str, TicTurn, MoveResult]
+TicStateGenerator = Generator[str, TicTurn, str]
 Tic = Callable[[
     GridGenerator,
     GameCompleteCheck,
@@ -38,44 +38,52 @@ def get_player_x_y(maximum: int) -> XYInput:
 def tic_turn_generator(
     x_y_input: XYInput,
 ) -> TicTurnGenerator:
-    input_display: GameState = yield
+    game_state: GameState = yield
     while True:
-        x, y = x_y_input(input_display.current_player.icon)
-        input_display = yield TicTurn(
-            input_display.state, input_display.current_player.icon, x, y
+        x, y = x_y_input(game_state.current_player.icon)
+        game_state = yield TicTurn(
+            game_state.state, game_state.current_player.icon, x, y
         )
 
 
-def tic(
-        _grid_generator:                    GridGenerator,
-        _is_the_game_complete_horizontally: GameCompleteCheck,
-        _is_the_game_complete_vertically:   GameCompleteCheck,
-        _move:                              Move,
-        _dimension:                         int,
+def tic_state_generator(
+    _grid_generator:                    GridGenerator,
+    _is_the_game_complete_horizontally: GameCompleteCheck,
+    _is_the_game_complete_vertically:   GameCompleteCheck,
+    _move:                              Move,
+    dimension:                          int,
 ) -> TicStateGenerator:
-    def _lift_move(turn: TicTurn) -> MoveResult:
+    state = _grid_generator(dimension)
+    turn = yield state
+
+    while True:
         new_state = _move(turn.icon, turn.current_state, turn.x, turn.y)
-        if (h := _is_the_game_complete_horizontally(new_state)) is not None:
-            return MoveResult(new_state, CompletedGame(h, None))
-        if (v := _is_the_game_complete_vertically(new_state)) is not None:
-            return MoveResult(new_state, CompletedGame(None, v))
-        return MoveResult(new_state, None)
+        if _is_the_game_complete_horizontally(new_state) or \
+                _is_the_game_complete_vertically(new_state):
+            return new_state
 
-    def _play():
-        state = _grid_generator(_dimension)
-        turn = yield state
-        while True:
-            result = _lift_move(turn)
-            if result.completed is not None:
-                return result
-            turn = yield result.state
+        turn = yield new_state
 
-    return _play()
+
+def tic(
+    _grid_generator:                    GridGenerator,
+    _is_the_game_complete_horizontally: GameCompleteCheck,
+    _is_the_game_complete_vertically:   GameCompleteCheck,
+    _move:                              Move,
+    _dimension:                          int,
+) -> Tuple[TicStateGenerator, TicTurnGenerator]:
+    return tic_state_generator(
+        _grid_generator,
+        _is_the_game_complete_horizontally,
+        _is_the_game_complete_vertically,
+        _move,
+        _dimension
+    ), tic_turn_generator(get_player_x_y(_dimension))
 
 
 def default_tic(
         dimension: int
-) -> TicStateGenerator:
+) -> Tuple[TicStateGenerator, TicTurnGenerator]:
     return tic(
         grid_generator,
         is_the_game_complete_horizontally,

@@ -70,9 +70,7 @@ def tac_game(
     return 'hello'
 
 
-def lift_valid_move(
-        _valid_move: ValidMoveCheck
-) -> Callable[[GameState, ColumnOrRow, int], bool]:
+def lift_valid_move(_valid_move: ValidMoveCheck) -> Callable[[GameState, ColumnOrRow, int], bool]:
     def _lift_valid_move(game_state: GameState, column_or_row: ColumnOrRow, index: int) -> bool:
         return _valid_move(game_state.state, column_or_row, game_state.current_player.icon, index)
 
@@ -104,8 +102,9 @@ def tac(
         _tac_turn_checker:     TacTurnChecker,
         _starting_grid:        str,
 ) -> Tuple[TacTurnGenerator, TacStateGenerator]:
+    dimension = len(_starting_grid.split('\n')[0])
     return tac_turn_generator(
-        get_column_or_row_index(len('/n'.split(_starting_grid)[0])),
+        get_column_or_row_index(dimension),
         _tac_turn_checker
     ), tac_state_generator(
         _is_the_game_complete,

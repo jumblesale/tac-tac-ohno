@@ -1,19 +1,8 @@
-from typing import Optional, Tuple, Callable, NamedTuple, List, Generator
+from typing import Optional, Callable, NamedTuple
 
 GridGenerator = Callable[[int], str]
-GameComplete = Optional[Tuple[int, str]]
-GameCompleteCheck = Callable[[str], GameComplete]
+GameCompleteCheck = Callable[[str], bool]
 Move = Callable[[str, str, int, int], str]
-
-
-class CompletedGame(NamedTuple):
-    rows:    GameComplete
-    columns: GameComplete
-
-
-class MoveResult(NamedTuple):
-    state:     str
-    completed: Optional[CompletedGame]
 
 
 def move(icon: str, state: str, x: int, y: int) -> str:
@@ -26,24 +15,24 @@ def grid_generator(dimension: int) -> str:
     return '\n'.join([('*' * dimension)] * dimension)
 
 
-def is_the_game_complete_horizontally(state: str) -> GameComplete:
+def is_the_game_complete_horizontally(state: str) -> bool:
     for index, row in enumerate(state.split('\n')):
         first_character = row[0]
         if first_character == '*':
             continue
         if all([x == first_character for x in row]):
-            return index, first_character
-    return None
+            return True
+    return False
 
 
-def is_the_game_complete_vertically(state: str) -> GameComplete:
+def is_the_game_complete_vertically(state: str) -> bool:
     if len(state) == 1:
-        return None if state == '*' else (0, state)
+        return False if state == '*' else True
     matrix = [list(x) for x in state.split('\n')]
     first_row = matrix[0]
     for column_index, _ in enumerate(matrix):
         if (first_character := first_row[column_index]) == '*':
             continue
         if all([x[column_index] == first_character for x in matrix]):
-            return column_index, first_character
-    return None
+            return True
+    return False
