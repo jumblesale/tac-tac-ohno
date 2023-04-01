@@ -1,8 +1,9 @@
 import itertools
+from typing import Generator, Tuple
 
 from tic_tac_ohno.game_lib import Player, GameState
-from tic_tac_ohno.tac_game import tac_turn_generator, get_column_or_row_index, default_tac
-from tic_tac_ohno.tic_game import tic_turn_generator, get_player_x_y, default_tic
+from tic_tac_ohno.tac_game import default_tac
+from tic_tac_ohno.tic_game import default_tic
 
 
 def draw(title: str, state: str, current_player: Player, next_player: Player, turn_count: int):
@@ -61,7 +62,7 @@ def game(
     state_generator,
     turn_generator,
     _turn_count_generator,
-):
+) -> Generator[str, None, Tuple[str, str]]:
     state = next(state_generator)
     next(turn_generator)
     turn_count = next(_turn_count_generator)
