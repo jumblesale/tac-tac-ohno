@@ -13,8 +13,8 @@ def clear_screen():
     def _clear_screen():
         try:
             from google.colab import output
-            return output.clear()
-        except ModuleNotFoundError as ex:
+            return output.clear
+        except ModuleNotFoundError:
             import os
             return lambda: os.system('cls' if os.name == 'nt' else 'clear')
     if not hasattr(clear_screen, 'cls'):
