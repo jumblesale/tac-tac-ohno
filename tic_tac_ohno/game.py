@@ -1,8 +1,8 @@
 import itertools
 from typing import Generator, Tuple
 
-from tic_tac_ohno.game_lib import Player, GameState, create_players, get_dimension
-from tic_tac_ohno.tic_game import tic
+from game_lib import Player, GameState, create_players, get_dimension
+from tic_game import tic
 
 
 def draw(title: str, state: str, current_player: Player, next_player: Player, turn_count: int):

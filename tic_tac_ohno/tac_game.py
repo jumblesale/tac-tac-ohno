@@ -1,7 +1,7 @@
 from typing import Generator, Literal, Callable, Tuple, cast, NamedTuple
 
-from tic_tac_ohno.game_lib import GameState, Player, get_bounded_player_input
-from tic_tac_ohno.tac.tac import Move, is_the_game_complete, valid_move, move, ValidMoveCheck, GameCompleteCheck
+from game_lib import GameState, Player, get_bounded_player_input
+from tac.tac import Move, is_the_game_complete, valid_move, move, ValidMoveCheck, GameCompleteCheck
 
 ColumnOrRow = Literal['c', 'r']
 RowColumnInput = Callable[[str], Tuple[ColumnOrRow, int]]

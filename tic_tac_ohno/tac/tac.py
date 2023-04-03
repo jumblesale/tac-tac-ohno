@@ -1,5 +1,5 @@
 import functools
-from typing import List, Literal, Callable, NamedTuple, Generator
+from typing import List, Literal, Callable
 
 ColumnOrRow = Literal['c', 'r']
 Move = Callable[[str, ColumnOrRow, str, str, int], str]

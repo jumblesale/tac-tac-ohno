@@ -1,4 +1,4 @@
-from typing import Optional, Callable, NamedTuple
+from typing import Callable
 
 GridGenerator = Callable[[int], str]
 GameCompleteCheck = Callable[[str], bool]
