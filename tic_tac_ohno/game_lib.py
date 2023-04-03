@@ -39,6 +39,12 @@ def get_dimension():
     return dimension
 
 
+def player_prompt(what_are_they_inputting: str) -> Callable[[Player], str]:
+    def _player_prompt(player: Player):
+        return f'{player.player}({player.icon}) {what_are_they_inputting}: '
+    return _player_prompt
+
+
 def get_bounded_player_input(maximum: int) -> Callable[[str], int]:
     def _out_of_bounds(_input: int):
         print(f'{_input} is out of bounds')

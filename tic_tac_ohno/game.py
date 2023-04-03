@@ -49,7 +49,7 @@ def draw(title: str, state: str, current_player: Player, next_player: Player, tu
 
     def _draw_players(_current_player: Player, _next_player: Player):
         return f"""
-| {green_square}  {current_player.player}({current_player.icon}){' ' * 21}{red_square} {next_player.player}({next_player.icon}) |""".lstrip()
+| {green_square} {current_player.player}({current_player.icon}){' ' * 22}{red_square} {next_player.player}({next_player.icon}) |""".lstrip()
 
     def _draw_turn_counter(_turn_count: int):
         turn = ' Turn: '
@@ -207,13 +207,23 @@ def welcome():
 """)
 
 
-def main():
-    tic_tac_ohno = 'tac'
-    if tic_tac_ohno == 'tic':
-        tic_result = _play_tic(default_tic(get_dimension()))
-    else:
-        tic_result = '0*\n01', player_generator_from_icons('0', '1'), turn_count_generator()
+def tic_solution():
+    tic_result = _play_tic(default_tic(get_dimension()))
+    return tic_result
+
+
+def tac_solution():
+    tic_result = '0*\n01', player_generator_from_icons('0', '1'), turn_count_generator()
     tac_result = _play_tac(default_tac(tic_result[0]), tic_result[1], tic_result[2])
+    return tac_result
+
+
+def main():
+    tic_tac_ohno = 'tic'
+    return {
+        'tic': tic_solution,
+        'tac': tac_solution,
+    }[tic_tac_ohno]()
 
 
 if __name__ == '__main__':

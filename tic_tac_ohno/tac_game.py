@@ -1,12 +1,12 @@
 from typing import Generator, Literal, Callable, Tuple, cast, NamedTuple
 
-from game_lib import GameState, Player, get_bounded_player_input
+from game_lib import GameState, Player, get_bounded_player_input, player_prompt
 from tac.tac import Move, is_the_game_complete, valid_move, move, ValidMoveCheck, GameCompleteCheck
 
 ColumnOrRow = Literal['c', 'r']
 RowColumnInput = Callable[[str], Tuple[ColumnOrRow, int]]
 ColumnRow = Tuple[ColumnOrRow, int]
-ColumnRowInput = Callable[[str], ColumnRow]
+ColumnRowInput = Callable[[Player], ColumnRow]
 
 
 class TacTurn(NamedTuple):
@@ -22,19 +22,18 @@ TacStateGenerator = Generator[str, TacTurn, None]
 TacTurnChecker = Callable[[GameState, ColumnOrRow, int], bool]
 
 
-def get_column_or_row_index(
-        maximum: int
-) -> ColumnRowInput:
+def get_column_or_row_index(maximum: int) -> ColumnRowInput:
     _input = get_bounded_player_input(maximum)
+    _column_row_prompt = player_prompt('Column or Row [cr]')
 
     def _input_to_column_row_literal(cr: str) -> ColumnOrRow:
         return {'c': 'c', 'r': 'r'}[cr]
 
-    def _get_column_or_row(_current_player_icon: str) -> ColumnRow:
-        _column_or_row = input(f'{_current_player_icon} column or row? [cr] ')
+    def _get_column_or_row(_current_player: Player) -> ColumnRow:
+        _column_or_row = input(_column_row_prompt(_current_player))
         if len(_column_or_row) != 1 or _column_or_row[0].lower() not in 'cr':
             print(f"I don't understand {_column_or_row} - please choose from [cr]")
-            return _get_column_or_row(_current_player_icon)
+            return _get_column_or_row(_current_player)
         _prompt = 'column' if _column_or_row == 'c' else 'row'
         _index = _input(f'Which {_prompt}? ')
         return _input_to_column_row_literal(_column_or_row), _index
@@ -47,7 +46,7 @@ def tac_turn_generator(
 ) -> TacTurnGenerator:
     game_state: GameState = yield
     while True:
-        column_or_row, index = _column_row_input(game_state.current_player.icon)
+        column_or_row, index = _column_row_input(game_state.current_player)
         if not _valid_move_check(game_state, column_or_row, index):
             print(f'{"Column" if column_or_row == "c" else "Row"} {index} does not start with',
                   f'{game_state.current_player.icon}, please choose a different move.')

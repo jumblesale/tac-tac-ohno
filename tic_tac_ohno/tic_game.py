@@ -1,6 +1,6 @@
 from typing import Callable, Generator, Tuple, NamedTuple
 
-from game_lib import GameState, get_bounded_player_input
+from game_lib import GameState, get_bounded_player_input, Player, player_prompt
 from tic.tic import GridGenerator, GameCompleteCheck, Move, grid_generator, \
     is_the_game_complete_horizontally, is_the_game_complete_vertically, move
 
@@ -26,10 +26,11 @@ Tic = Callable[[
 
 def get_player_x_y(maximum: int) -> XYInput:
     _input = get_bounded_player_input(maximum)
+    x_prompt = player_prompt('x')
+    y_prompt = player_prompt('y')
 
-    def _get_player_x_y(player_icon: str):
-        x = _input(f'{player_icon} x: ')
-        y = _input(f'{player_icon} y: ')
+    def _get_player_x_y(player: Player):
+        x, y = (_input(x(player)) for x in (x_prompt, y_prompt))
         return x, y
     return _get_player_x_y
 
@@ -39,7 +40,7 @@ def tic_turn_generator(
 ) -> TicTurnGenerator:
     game_state: GameState = yield
     while True:
-        x, y = x_y_input(game_state.current_player.icon)
+        x, y = x_y_input(game_state.current_player)
         game_state = yield TicTurn(
             game_state.state, game_state.current_player.icon, x, y
         )
