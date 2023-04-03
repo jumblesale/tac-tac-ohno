@@ -1,10 +1,10 @@
-import functools
 import itertools
-from typing import Generator, Tuple, Callable
+from typing import Generator, Tuple
+from termcolor import colored
 
 from game_lib import Player, GameState, create_players, get_dimension
-from tic_game import tic, default_tic
 from tac_game import tac, default_tac
+from tic_game import tic, default_tic
 
 INFO_BOX_WIDTH = 36
 
@@ -44,16 +44,18 @@ def draw(title: str, state: str, current_player: Player, next_player: Player, tu
     SCREEN_CLEARER()
     title = f'| {title} |'
     new_line = '\n'
+    green_square = colored('○', 'green')
+    red_square = colored('X', 'red')
 
     def _draw_players(_current_player: Player, _next_player: Player):
         return f"""
-| ✅  {current_player.player}({current_player.icon}){' ' * 20}🛑 {next_player.player}({next_player.icon}) |""".lstrip()
+| {green_square}  {current_player.player}({current_player.icon}){' ' * 21}{red_square} {next_player.player}({next_player.icon}) |""".lstrip()
 
     def _draw_turn_counter(_turn_count: int):
         turn = ' Turn: '
         width = len(title) - len(turn)
         return f"""
-+-------<{turn}{str(_turn_count).ljust(width, ' ')}>--------+""".lstrip()
++-------<{turn}{str(_turn_count).ljust(width - 1, ' ')}>--------+""".lstrip()
 
     return f"""
 {new_line.join(list(draw_state(INFO_BOX_WIDTH, state)))}
