@@ -26,12 +26,9 @@ Tic = Callable[[
 
 def get_player_x_y(maximum: int) -> XYInput:
     _input = get_bounded_player_input(maximum)
-    x_prompt = player_prompt('x')
-    y_prompt = player_prompt('y')
 
     def _get_player_x_y(player: Player):
-        x, y = (_input(x(player)) for x in (x_prompt, y_prompt))
-        return x, y
+        return (_input(player_prompt(z)(player)) for z in ('x', 'y'))
     return _get_player_x_y
 
 

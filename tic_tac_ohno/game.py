@@ -44,8 +44,8 @@ def draw(title: str, state: str, current_player: Player, next_player: Player, tu
     SCREEN_CLEARER()
     title = f'| {title} |'
     new_line = '\n'
-    green_square = colored('○', 'green')
-    red_square = colored('X', 'red')
+    green_square = colored('█', 'green')
+    red_square = colored('░', 'red')
 
     def _draw_players(_current_player: Player, _next_player: Player):
         return f"""
@@ -202,7 +202,7 @@ def welcome():
 /__   (_) ___    /__   \__ _  ___      /___\ |__     /\ \ \___   / \
   / /\/ |/ __|     / /\/ _` |/ __|    //  // '_ \   /  \/ / _ \ /  /
  / /  | | (__ _   / / | (_| | (__ _  / \_//| | | | / /\  / (_) /\_/ 
- \/   |_|\___( )  \/   \__,_|\___( ) \___/ |_| |_| \_\ \/ \___/\/   
+ \/   |_|\___( )  \/   \__,_|\___( ) \___/ |_| |_| \_\ \/ \___/\/ 💫
              |/                  |/                                 
 """)
 

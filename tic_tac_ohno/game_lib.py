@@ -50,7 +50,6 @@ def get_bounded_player_input(maximum: int) -> Callable[[str], int]:
         print(f'{_input} is out of bounds')
 
     def _get_player_x_y(prompt: str):
-        nonlocal maximum
         _input = input(prompt)
         try:
             _input = int(_input)
