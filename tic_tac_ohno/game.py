@@ -152,10 +152,10 @@ def play_tac(
 ):
     final_tic_state, _player_generator, _turn_count_generator = tic_result
     return _play_tac(tic_result, tac(
-            _is_the_game_complete=_is_the_game_complete,
-            _move=_move,
-            _tac_turn_checker=_tac_turn_checker,
-            _starting_grid=final_tic_state,
+        _is_the_game_complete=_is_the_game_complete,
+        _move=_move,
+        _tac_turn_checker=_tac_turn_checker,
+        _starting_grid=final_tic_state,
     ))
 
 
