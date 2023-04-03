@@ -2,10 +2,11 @@ import itertools
 from typing import Generator, Tuple
 
 from game_lib import Player, GameState, create_players, get_dimension
-from tic_game import tic
-from tac_game import tac
+from tic_game import tic, default_tic
+from tac_game import tac, default_tac
 
 INFO_BOX_WIDTH = 36
+
 
 def draw_state(screen_width: int, _state: str):
     rows = _state.splitlines()
@@ -16,11 +17,11 @@ def draw_state(screen_width: int, _state: str):
         *[f'{str(row_counter).ljust(3, " ")}| {row}' for row_counter, row in enumerate(rows)]
     ]]
 
-def draw_final_state(state: str, turn_count: int):
+
+def draw_final_state(state: str):
     print('GAME OVER')
-    print(f'After {turn_count} turns')
     print('Final state:')
-    print(draw_state(INFO_BOX_WIDTH, state))
+    [print(x) for x in draw_state(INFO_BOX_WIDTH, state)]
 
 
 def draw(title: str, state: str, current_player: Player, next_player: Player, turn_count: int):
@@ -52,6 +53,12 @@ def turn_count_generator():
     yield from itertools.count(0)
 
 
+def player_generator_from_icons(alpha_icon: str, omega_icon: str):
+    alpha, omega = Player('ɑ', alpha_icon), Player('Ω', omega_icon)
+    return itertools.cycle(
+        [(alpha, omega), (omega, alpha)])
+
+
 def player_generator():
     alpha, omega = create_players()
     return itertools.cycle(
@@ -61,14 +68,15 @@ def player_generator():
 def consume_generator(generator):
     while True:
         try:
-            print(next(generator))
+            _next = next(generator)
+            print(_next)
         except StopIteration as ex:
             return ex.value
 
 
 def game(
     title: str,
-    player_generator,
+    _player_generator,
     state_generator,
     turn_generator,
     _turn_count_generator,
@@ -76,7 +84,7 @@ def game(
     state = next(state_generator)
     next(turn_generator)
     turn_count = next(_turn_count_generator)
-    current_player, next_player = next(player_generator)
+    current_player, next_player = next(_player_generator)
     yield draw(title, state, current_player, next_player, turn_count)
     while True:
         game_state = GameState(state, current_player, next_player)
@@ -86,24 +94,68 @@ def game(
         except StopIteration as ex:
             yield draw(title, ex.value, current_player, next_player, turn_count)
             # discard the next player
-            next(player_generator)
-            return ex.value, next_player.icon
+            next(_player_generator)
+            return ex.value
         turn_count = next(_turn_count_generator)
-        current_player, next_player = next(player_generator)
+        current_player, next_player = next(_player_generator)
         yield draw(title, state, current_player, next_player, turn_count)
 
 
+def _play_tac(
+    tac_creator,
+    _player_generator=None,
+    _turn_count_generator=None,
+):
+    if _turn_count_generator is None:
+        _turn_count_generator = turn_count_generator()
+    if _player_generator is None:
+        _player_generator = player_generator()
+
+    _tac_state_generator, _tac_turn_generator = tac_creator
+    tac_game = game(
+        title='tic, TAC, oh no!',
+        state_generator=_tac_state_generator,
+        _player_generator=_player_generator,
+        turn_generator=_tac_turn_generator,
+        _turn_count_generator=_turn_count_generator,
+    )
+
+    final_state = consume_generator(tac_game)
+    draw_final_state(final_state)
+    return final_state, player_generator, _turn_count_generator
+
+
 def play_tac(
+    tic_result,
     _is_the_game_complete,
     _move,
     _tac_turn_checker,
 ):
-    tac(
-        _is_the_game_complete=_is_the_game_complete,
-        _move=_move,
-        _tac_turn_checker=_tac_turn_checker,
-        _starting_grid=
+    final_tic_state, _player_generator, _turn_count_generator = tic_result
+    return _play_tac(tic_result, tac(
+            _is_the_game_complete=_is_the_game_complete,
+            _move=_move,
+            _tac_turn_checker=_tac_turn_checker,
+            _starting_grid=final_tic_state,
+    ))
+
+
+def _play_tic(tic_creator):
+    _turn_count_generator = turn_count_generator()
+    _player_generator = player_generator()
+    _tic_state_generator, _tic_turn_generator = tic_creator
+    tic_game = game(
+        title='TIC, tac, oh no!',
+        state_generator=_tic_state_generator,
+        _player_generator=_player_generator,
+        turn_generator=_tic_turn_generator,
+        _turn_count_generator=_turn_count_generator,
     )
+
+    final_state = consume_generator(tic_game)
+    draw_final_state(final_state)
+    return final_state, _player_generator, _turn_count_generator
+
 
 def play_tic(
     _grid_generator,
@@ -111,26 +163,12 @@ def play_tic(
     _is_the_game_complete_vertically,
     _move
 ):
-    _turn_count_generator = turn_count_generator()
-    def _play(tic_creator):
-        _tic_state_generator, _tic_turn_generator = tic_creator
-        tic_game = game(
-            title='TIC, tac, oh no!',
-            state_generator=_tic_state_generator,
-            player_generator=player_generator(),
-            turn_generator=_tic_turn_generator,
-            _turn_count_generator=_turn_count_generator,
-        )
-
-        return consume_generator(tic_game)
-
-    final_state = _play(tic(
+    return _play_tic(tic(
         _grid_generator=_grid_generator,
         _is_the_game_complete_horizontally=_is_the_game_complete_horizontally,
         _is_the_game_complete_vertically=_is_the_game_complete_vertically,
         _move=_move,
-        _dimension=get_dimension(), ))
-    draw_final_state(final_state, next(_turn_count_generator) - 1)
+        _dimension=get_dimension()))
 
 
 def welcome():
@@ -151,7 +189,12 @@ def welcome():
 
 
 def main():
-    pass
+    tic_tac_ohno = 'tac'
+    if tic_tac_ohno == 'tic':
+        tic_result = _play_tic(default_tic(get_dimension()))
+    else:
+        tic_result = '0*\n01', player_generator_from_icons('0', '1'), turn_count_generator()
+    tac_result = _play_tac(default_tac(tic_result[0]), tic_result[1], tic_result[2])
 
 
 if __name__ == '__main__':

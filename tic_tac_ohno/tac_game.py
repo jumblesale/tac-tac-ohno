@@ -92,21 +92,21 @@ def tac(
         _move:                 Move,
         _tac_turn_checker:     TacTurnChecker,
         _starting_grid:        str,
-) -> Tuple[TacTurnGenerator, TacStateGenerator]:
+) -> Tuple[TacStateGenerator, TacTurnGenerator]:
     dimension = len(_starting_grid.split('\n')[0])
-    return tac_turn_generator(
-        get_column_or_row_index(dimension),
-        _tac_turn_checker
-    ), tac_state_generator(
+    return tac_state_generator(
         _is_the_game_complete,
         _move,
         _starting_grid,
+    ), tac_turn_generator(
+        get_column_or_row_index(dimension),
+        _tac_turn_checker
     )
 
 
 def default_tac(
     starting_grid:    str,
-) -> Tuple[TacTurnGenerator, TacStateGenerator]:
+) -> Tuple[TacStateGenerator, TacTurnGenerator]:
     return tac(
         is_the_game_complete,
         move,
