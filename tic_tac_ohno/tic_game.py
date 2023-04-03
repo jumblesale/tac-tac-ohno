@@ -1,8 +1,7 @@
-import itertools
 from typing import Callable, Generator, Tuple, NamedTuple
 
-from tic_tac_ohno.game_lib import GameState, get_bounded_player_input
-from tic_tac_ohno.tic.tic import GridGenerator, GameCompleteCheck, Move, grid_generator,\
+from game_lib import GameState, get_bounded_player_input
+from tic.tic import GridGenerator, GameCompleteCheck, Move, grid_generator, \
     is_the_game_complete_horizontally, is_the_game_complete_vertically, move
 
 XYInput = Callable[[str], Tuple[int, int]]
