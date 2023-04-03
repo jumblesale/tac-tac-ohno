@@ -70,7 +70,7 @@ def tic(
     _is_the_game_complete_horizontally: GameCompleteCheck,
     _is_the_game_complete_vertically:   GameCompleteCheck,
     _move:                              Move,
-    _dimension:                          int,
+    _dimension:                         int,
 ) -> Tuple[TicStateGenerator, TicTurnGenerator]:
     return tic_state_generator(
         _grid_generator,

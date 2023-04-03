@@ -1,9 +1,9 @@
 import itertools
 from typing import Generator, Tuple
 
-from tic_tac_ohno.game_lib import Player, GameState
+from tic_tac_ohno.game_lib import Player, GameState, create_players, get_dimension
 from tic_tac_ohno.tac_game import default_tac
-from tic_tac_ohno.tic_game import default_tic
+from tic_tac_ohno.tic_game import default_tic, tic
 
 
 def draw(title: str, state: str, current_player: Player, next_player: Player, turn_count: int):
@@ -42,10 +42,13 @@ def draw(title: str, state: str, current_player: Player, next_player: Player, tu
 
 
 def turn_count_generator():
-    count = 0
-    while True:
-        yield count
-        count += 1
+    yield from itertools.count(0)
+
+
+def player_generator():
+    alpha, omega = create_players()
+    return itertools.cycle(
+        [(alpha, omega), (omega, alpha)])
 
 
 def consume_generator(generator):
@@ -83,49 +86,37 @@ def game(
         yield draw(title, state, current_player, next_player, turn_count)
 
 
+def play_tic(
+    _grid_generator,
+    _is_the_game_complete_horizontally,
+    _is_the_game_complete_vertically,
+    _move
+):
+    def _play(tic_creator):
+        _tic_state_generator, _tic_turn_generator = tic_creator
+        tic_game = game(
+            title='TIC, tac, oh no!',
+            state_generator=_tic_state_generator,
+            player_generator=player_generator(),
+            turn_generator=_tic_turn_generator,
+            _turn_count_generator=turn_count_generator(),
+        )
+
+        return consume_generator(tic_game)
+
+    return _play(
+        tic(
+            _grid_generator=_grid_generator,
+            _is_the_game_complete_horizontally=_is_the_game_complete_horizontally,
+            _is_the_game_complete_vertically=_is_the_game_complete_vertically,
+            _move=_move,
+            _dimension=get_dimension(),
+        )
+    )
+
+
 def main():
-    def _get_dimension():
-        return 2
-        _max = 9
-        _min = 2
-        _dimension = int(input('How big should the grid be? '))
-        if _dimension > _max:
-            print(f'Maximum dimension is {_max}')
-            return _get_dimension()
-        if _dimension < _min:
-            print(f'Minimum dimension is {_min}')
-            return _get_dimension()
-        return _dimension
-    dimension = _get_dimension()
-    # alpha_icon = input('Player ⍺, choose an icon: ')
-    # omega_icon = input('Player Ω, choose an icon: ')
-    alpha_icon = '@'
-    omega_icon = 'O'
-    alpha = Player('⍺', alpha_icon)
-    omega = Player('Ω', omega_icon)
-    player_generator = itertools.cycle(
-        [(alpha, omega), (omega, alpha)])
-    _turn_count_generator = turn_count_generator()
-
-    _tic_state_generator, _tic_turn_generator = default_tic(dimension)
-    tic_game = game(
-        'TIC, tac, oh no!',
-        player_generator,
-        _tic_state_generator,
-        _tic_turn_generator,
-        _turn_count_generator,
-    )
-    final_state, next_player_icon = consume_generator(tic_game)
-
-    _tac_turn_generator, _tac_state_generator = default_tac(final_state)
-    tac_game = game(
-        'tic, TAC, oh no!',
-        player_generator,
-        _tac_state_generator,
-        _tac_turn_generator,
-        _turn_count_generator,
-    )
-    final_state = consume_generator(tac_game)
+    pass
 
 
 if __name__ == '__main__':

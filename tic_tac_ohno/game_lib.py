@@ -1,4 +1,4 @@
-from typing import Callable, NamedTuple, Literal
+from typing import Callable, NamedTuple, Literal, Tuple
 
 Players = Literal['⍺', 'Ω']
 
@@ -14,11 +14,34 @@ class GameState(NamedTuple):
     other_player:   Player
 
 
+def get_player_icon(player: str) -> str:
+    icon = input(f'Player {player}, choose an icon: ')
+    if len(icon) > 1:
+        print(f'"{icon}" is too long, please choose a single character')
+        return get_player_icon(player)
+    return icon
+
+
+def create_players() -> Tuple[Player, Player]:
+    return tuple([Player(x, get_player_icon(x)) for x in ('α', 'Ω')])
+
+
+def get_dimension():
+    _max = 9
+    _min = 2
+    dimension = int(input('How big should the grid be? '))
+    if dimension > _max:
+        print(f'Maximum dimension is {_max}')
+        return get_dimension()
+    if dimension < _min:
+        print(f'Minimum dimension is {_min}')
+        return get_dimension()
+    return dimension
+
+
 def get_bounded_player_input(maximum: int) -> Callable[[str], int]:
     def _out_of_bounds(_input: int):
-        nonlocal maximum
         print(f'{_input} is out of bounds')
-        return _get_player_x_y(maximum)
 
     def _get_player_x_y(prompt: str):
         nonlocal maximum
@@ -27,7 +50,9 @@ def get_bounded_player_input(maximum: int) -> Callable[[str], int]:
             _input = int(_input)
         except ValueError:
             print(f"I'm sorry I don't think that {_input} is a number")
+            return _get_player_x_y(prompt)
         if _input > maximum:
-            return _out_of_bounds(_input)
+            _out_of_bounds(_input)
+            return _get_player_x_y(prompt)
         return _input
     return _get_player_x_y
