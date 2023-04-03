@@ -31,7 +31,7 @@ def get_column_or_row_index(
         return {'c': 'c', 'r': 'r'}[cr]
 
     def _get_column_or_row(_current_player_icon: str) -> ColumnRow:
-        _column_or_row = input(f'{_current_player_icon} column or row? [cr]')
+        _column_or_row = input(f'{_current_player_icon} column or row? [cr] ')
         if len(_column_or_row) != 1 or _column_or_row[0].lower() not in 'cr':
             print(f"I don't understand {_column_or_row} - please choose from [cr]")
             return _get_column_or_row(_current_player_icon)

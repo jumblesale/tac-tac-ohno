@@ -1,11 +1,25 @@
+import functools
 import itertools
-from typing import Generator, Tuple
+from typing import Generator, Tuple, Callable
 
 from game_lib import Player, GameState, create_players, get_dimension
 from tic_game import tic, default_tic
 from tac_game import tac, default_tac
 
 INFO_BOX_WIDTH = 36
+
+
+def clear_screen():
+    def _clear_screen():
+        try:
+            from google.colab import output
+            return output.clear()
+        except ModuleNotFoundError as ex:
+            import os
+            return lambda: os.system('cls' if os.name == 'nt' else 'clear')
+    if not hasattr(clear_screen, 'cls'):
+        clear_screen.cls = _clear_screen()
+    return clear_screen.cls()
 
 
 def draw_state(screen_width: int, _state: str):
@@ -30,7 +44,7 @@ def draw(title: str, state: str, current_player: Player, next_player: Player, tu
 
     def _draw_players(_current_player: Player, _next_player: Player):
         return f"""
-| ✅ {current_player.player}({current_player.icon}){' ' * 20}🛑 {next_player.player}({next_player.icon}) |""".lstrip()
+| ✅  {current_player.player}({current_player.icon}){' ' * 20}🛑 {next_player.player}({next_player.icon}) |""".lstrip()
 
     def _draw_turn_counter(_turn_count: int):
         turn = ' Turn: '
@@ -38,6 +52,7 @@ def draw(title: str, state: str, current_player: Player, next_player: Player, tu
         return f"""
 +-------<{turn}{str(_turn_count).ljust(width, ' ')}>--------+""".lstrip()
 
+    clear_screen()
     return f"""
 {new_line.join(list(draw_state(INFO_BOX_WIDTH, state)))}
 
