@@ -12,14 +12,15 @@ INFO_BOX_WIDTH = 36
 def clear_screen():
     def _clear_screen():
         try:
-            from google.colab import output
-            return output.clear
+            from IPython.display import clear_output
+            return clear_output
         except ModuleNotFoundError:
             import os
             return lambda: os.system('cls' if os.name == 'nt' else 'clear')
-    if not hasattr(clear_screen, 'cls'):
-        clear_screen.cls = _clear_screen()
-    return clear_screen.cls()
+    return _clear_screen()
+
+
+SCREEN_CLEARER = clear_screen()
 
 
 def draw_state(screen_width: int, _state: str):
@@ -33,12 +34,14 @@ def draw_state(screen_width: int, _state: str):
 
 
 def draw_final_state(state: str):
+    SCREEN_CLEARER()
     print('GAME OVER')
     print('Final state:')
     [print(x) for x in draw_state(INFO_BOX_WIDTH, state)]
 
 
 def draw(title: str, state: str, current_player: Player, next_player: Player, turn_count: int):
+    SCREEN_CLEARER()
     title = f'| {title} |'
     new_line = '\n'
 
@@ -52,7 +55,6 @@ def draw(title: str, state: str, current_player: Player, next_player: Player, tu
         return f"""
 +-------<{turn}{str(_turn_count).ljust(width, ' ')}>--------+""".lstrip()
 
-    clear_screen()
     return f"""
 {new_line.join(list(draw_state(INFO_BOX_WIDTH, state)))}
 
