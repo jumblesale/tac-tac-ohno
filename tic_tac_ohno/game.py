@@ -114,6 +114,10 @@ def play_tic(
     )
 
 
+def welcome():
+    print('Welcome to Tic, Tac, Oh No!')
+
+
 def main():
     pass
 
