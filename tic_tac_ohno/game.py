@@ -3,11 +3,28 @@ from typing import Generator, Tuple
 
 from game_lib import Player, GameState, create_players, get_dimension
 from tic_game import tic
+from tac_game import tac
+
+INFO_BOX_WIDTH = 36
+
+def draw_state(screen_width: int, _state: str):
+    rows = _state.splitlines()
+    width = len(rows[0])
+    return [x.center(screen_width, ' ') for x in [
+        f'   | {"".join([str(x) for x in range(0, width)])}',
+        f'---+-{"-" * width}',
+        *[f'{str(row_counter).ljust(3, " ")}| {row}' for row_counter, row in enumerate(rows)]
+    ]]
+
+def draw_final_state(state: str, turn_count: int):
+    print('GAME OVER')
+    print(f'After {turn_count} turns')
+    print('Final state:')
+    print(draw_state(INFO_BOX_WIDTH, state))
 
 
 def draw(title: str, state: str, current_player: Player, next_player: Player, turn_count: int):
     title = f'| {title} |'
-    info_box_width = 36
     new_line = '\n'
 
     def _draw_players(_current_player: Player, _next_player: Player):
@@ -20,21 +37,12 @@ def draw(title: str, state: str, current_player: Player, next_player: Player, tu
         return f"""
 +-------<{turn}{str(_turn_count).ljust(width, ' ')}>--------+""".lstrip()
 
-    def _draw_state(_state: str):
-        rows = _state.splitlines()
-        width = len(rows[0])
-        return [x.center(info_box_width, ' ') for x in [
-            f'   | {"".join([str(x) for x in range(0, width)])}',
-            f'---+-{"-" * width}',
-            *[f'{str(row_counter).ljust(3, " ")}| {row}' for row_counter, row in enumerate(rows)]
-        ]]
-
     return f"""
-{new_line.join(list(_draw_state(state)))}
+{new_line.join(list(draw_state(INFO_BOX_WIDTH, state)))}
 
- {("=" * len(title)).center(info_box_width, ' ')}
-+{title.center(info_box_width, '-')}+
-|{("=" * len(title)).center(info_box_width, ' ')}|
+ {("=" * len(title)).center(INFO_BOX_WIDTH, ' ')}
++{title.center(INFO_BOX_WIDTH, '-')}+
+|{("=" * len(title)).center(INFO_BOX_WIDTH, ' ')}|
 {_draw_players(current_player, next_player)}
 {_draw_turn_counter(turn_count)}
 """
@@ -85,12 +93,25 @@ def game(
         yield draw(title, state, current_player, next_player, turn_count)
 
 
+def play_tac(
+    _is_the_game_complete,
+    _move,
+    _tac_turn_checker,
+):
+    tac(
+        _is_the_game_complete=_is_the_game_complete,
+        _move=_move,
+        _tac_turn_checker=_tac_turn_checker,
+        _starting_grid=
+    )
+
 def play_tic(
     _grid_generator,
     _is_the_game_complete_horizontally,
     _is_the_game_complete_vertically,
     _move
 ):
+    _turn_count_generator = turn_count_generator()
     def _play(tic_creator):
         _tic_state_generator, _tic_turn_generator = tic_creator
         tic_game = game(
@@ -98,20 +119,18 @@ def play_tic(
             state_generator=_tic_state_generator,
             player_generator=player_generator(),
             turn_generator=_tic_turn_generator,
-            _turn_count_generator=turn_count_generator(),
+            _turn_count_generator=_turn_count_generator,
         )
 
         return consume_generator(tic_game)
 
-    return _play(
-        tic(
-            _grid_generator=_grid_generator,
-            _is_the_game_complete_horizontally=_is_the_game_complete_horizontally,
-            _is_the_game_complete_vertically=_is_the_game_complete_vertically,
-            _move=_move,
-            _dimension=get_dimension(),
-        )
-    )
+    final_state = _play(tic(
+        _grid_generator=_grid_generator,
+        _is_the_game_complete_horizontally=_is_the_game_complete_horizontally,
+        _is_the_game_complete_vertically=_is_the_game_complete_vertically,
+        _move=_move,
+        _dimension=get_dimension(), ))
+    draw_final_state(final_state, next(_turn_count_generator) - 1)
 
 
 def welcome():
